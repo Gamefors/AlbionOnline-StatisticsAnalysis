@@ -127,9 +127,10 @@ namespace StatisticsAnalysisTool.Views
         {
             Process.Start(new ProcessStartInfo { FileName = e.Uri.AbsoluteUri, UseShellExecute = true });
         }
-        
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            _mainWindowViewModel.SaveLootLogger();
             _mainWindowViewModel.SaveSettings(WindowState, RestoreBounds, Height, Width);
 
             if (_mainWindowViewModel.IsTrackingActive)

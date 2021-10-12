@@ -23,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -473,7 +474,7 @@ namespace StatisticsAnalysisTool.ViewModels
 
             if (SettingsController.CurrentSettings.IsTrackingActiveAtToolStart)
             {
-                StartTracking();
+                _ = StartTrackingAsync();
             }
 
             IsTrackingFilteredSilver = SettingsController.CurrentSettings.IsMainTrackerFilterSilver;
@@ -529,6 +530,28 @@ namespace StatisticsAnalysisTool.ViewModels
 
             ItemController.SaveFavoriteItemsToLocalFile();
             ItemController.SaveItemInformationLocal();
+        }
+
+        #endregion
+
+        #region Save loot logger
+
+        public void SaveLootLogger()
+        {
+            if (!SettingsController.CurrentSettings.IsAutomaticLootLoggerSaveActive || string.IsNullOrEmpty(SettingsController.CurrentSettings.AutomaticLootLoggerSavePath))
+            {
+                return;
+            }
+
+            try
+            {
+                File.WriteAllText(SettingsController.CurrentSettings.AutomaticLootLoggerSavePath, TrackingController.LootController.GetLootLoggerObjectsAsCsv());
+            }
+            catch (Exception e)
+            {
+                ConsoleManager.WriteLineForError(MethodBase.GetCurrentMethod()?.DeclaringType, e);
+                Log.Error(MethodBase.GetCurrentMethod()?.DeclaringType, e);
+            }
         }
 
         #endregion
@@ -679,13 +702,32 @@ namespace StatisticsAnalysisTool.ViewModels
             LoadFullItemInfoProBarMax = ItemController.Items.Count;
             IsFullItemInfoLoading = true;
 
-            foreach (var item in ItemController.Items)
+            var options = new ExecutionDataflowBlockOptions
             {
-                if (!IsFullItemInfoLoading) break;
+                MaxDegreeOfParallelism = 5,
+                BoundedCapacity = 50
+            };
 
+            var block = new ActionBlock<Item>(async item =>
+            {
                 item.FullItemInformation = await ItemController.GetFullItemInformationAsync(item);
-                LoadFullItemInfoProBarValue++;
+            }, options);
+
+            await foreach (var item in ItemController.Items.ToAsyncEnumerable())
+            {
+                if (!IsFullItemInfoLoading)
+                {
+                    break;
+                }
+
+                if (await block.SendAsync(item))
+                {
+                    LoadFullItemInfoProBarValue++;
+                }
             }
+
+            block.Complete();
+            await block.Completion;
 
             LoadFullItemInfoProBarGridVisibility = Visibility.Hidden;
 
@@ -841,7 +883,7 @@ namespace StatisticsAnalysisTool.ViewModels
 
             if (IsTrackingActive)
             {
-                StartTracking();
+                _ = StartTrackingAsync();
             }
             else
             {
@@ -849,7 +891,7 @@ namespace StatisticsAnalysisTool.ViewModels
             }
         }
 
-        public void StartTracking()
+        public async Task StartTrackingAsync()
         {
             if (NetworkManager.IsNetworkCaptureRunning)
             {
@@ -866,7 +908,7 @@ namespace StatisticsAnalysisTool.ViewModels
 
             DungeonStatsFilter = new DungeonStatsFilter(TrackingController);
 
-            IsTrackingActive = NetworkManager.StartNetworkCapture(this, TrackingController);
+            IsTrackingActive = await NetworkManager.StartNetworkCaptureAsync(this, TrackingController);
             Console.WriteLine(@"### Start Tracking...");
         }
 
@@ -1013,27 +1055,27 @@ namespace StatisticsAnalysisTool.ViewModels
 
             if (DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Damage)
             {
-                Clipboard.SetText(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage}({entity.DamagePercentage:N2}%)|{entity.Dps:N2} DPS\n"));
+                Clipboard.SetDataObject(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage}({entity.DamagePercentage:N2}%)|{entity.Dps:N2} DPS\n"));
             }
 
             if (DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Dps)
             {
-                Clipboard.SetText(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Dps:N2} DPS\n"));
+                Clipboard.SetDataObject(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Dps:N2} DPS\n"));
             }
 
             if (DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Heal)
             {
-                Clipboard.SetText(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Heal} Heal\n"));
+                Clipboard.SetDataObject(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Heal} Heal\n"));
             }
 
             if (DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Hps)
             {
-                Clipboard.SetText(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Hps:N2} HPS\n"));
+                Clipboard.SetDataObject(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Hps:N2} HPS\n"));
             }
 
             if (DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Name)
             {
-                Clipboard.SetText(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage}({entity.DamagePercentage:N2}%)|{entity.Dps:N2} DPS\n"));
+                Clipboard.SetDataObject(DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage}({entity.DamagePercentage:N2}%)|{entity.Dps:N2} DPS\n"));
             }
         }
 
