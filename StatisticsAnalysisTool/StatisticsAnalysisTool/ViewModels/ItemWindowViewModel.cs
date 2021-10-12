@@ -87,7 +87,7 @@ namespace StatisticsAnalysisTool.ViewModels
         };
 
         private ListCollectionView _currentMarketPricesCollectionView;
-        private ObservableCollection<CurrentMarketPrices> _currentMarketPrices = new();
+        private ObservableCollection<MainMarketPrices> _currentMarketPrices = new();
 
         public ItemWindowViewModel(ItemWindow mainWindow, Item item)
         {
@@ -152,8 +152,8 @@ namespace StatisticsAnalysisTool.ViewModels
 
             CurrentMarketPricesCollectionView = new ListCollectionView(CurrentMarketPrices);
 
-            //StartAutoUpdater();
-            await AutoUpdateMarketPricesAsync();
+            _ = Task.Run(AutoUpdateMarketPricesAsync);
+
             RefreshSpin = IsAutoUpdateActive;
         }
 
@@ -170,13 +170,55 @@ namespace StatisticsAnalysisTool.ViewModels
                 if (Item.UniqueName != null)
                 {
                     await GetCityItemPricesAsync().ConfigureAwait(false);
+                    SetBestPrices(CurrentMarketPrices);
+
                     //GetItemPricesInRealMoneyAsync();
                 }
 
-                //GetMainPriceStats();
                 //SetQualityPriceStatsOnListView();
 
+                SetRelevantItemWindowData();
+
                 await Task.Delay(SettingsController.CurrentSettings.RefreshRate - 100);
+            }
+        }
+
+        private void SetRelevantItemWindowData()
+        {
+            if (LoadingImageVisibility != Visibility.Hidden)
+            {
+                LoadingImageVisibility = Visibility.Hidden;
+            }
+
+            if (CurrentMarketPrices?.Count > 0)
+            {
+                HasItemPrices = true;
+            }
+
+            RefreshIconTooltipText = $"{LanguageController.Translation("LAST_UPDATE")}: {Formatting.CurrentDateTimeFormat(DateTime.Now)}";
+        }
+
+        private static void SetBestPrices(IReadOnlyCollection<MainMarketPrices> marketPrices)
+        {
+            if (marketPrices?.Count <= 0)
+            {
+                return;
+            }
+
+            var max = GetMaxPrice(marketPrices);
+
+            var marketPriceMax = marketPrices?.FirstOrDefault(x => x?.BuyPriceMax == max);
+            if (marketPriceMax?.BestBuyMaxPrice != null)
+            {
+                marketPriceMax.BestBuyMaxPrice = true;
+            }
+
+            var min = GetMinPrice(marketPrices);
+
+            var marketPriceMin = marketPrices?.FirstOrDefault(x => x?.SellPriceMin == min);
+            if (marketPriceMin?.BestSellMinPrice != null)
+            {
+                marketPriceMin.BestSellMinPrice = true;
             }
         }
 
@@ -198,7 +240,7 @@ namespace StatisticsAnalysisTool.ViewModels
                     }
                     else
                     {
-                        await Application.Current.Dispatcher.InvokeAsync(() => CurrentMarketPrices?.Add(new CurrentMarketPrices(cityMarketPrices)));
+                        await Application.Current.Dispatcher.InvokeAsync(() => CurrentMarketPrices?.Add(new MainMarketPrices(cityMarketPrices)));
                     }
                 }
 
@@ -695,16 +737,21 @@ namespace StatisticsAnalysisTool.ViewModels
         public void GetMainPriceStats()
         {
             if (CurrentCityPrices == null)
+            {
                 return;
+            }
 
             var filteredCityPrices = GetFilteredCityPrices(ShowBlackZoneOutpostsChecked, ShowVillagesChecked, true, true);
             var statsPricesTotalList = PriceUpdate(filteredCityPrices);
 
-            FindBestPrice(ref statsPricesTotalList);
+            //FindBestPrice(ref statsPricesTotalList);
 
             var marketCurrentPricesItemList = statsPricesTotalList.Select(item => new MarketCurrentPricesItem(item)).ToList();
 
-            if (LoadingImageVisibility != Visibility.Hidden) LoadingImageVisibility = Visibility.Hidden;
+            if (LoadingImageVisibility != Visibility.Hidden)
+            {
+                LoadingImageVisibility = Visibility.Hidden;
+            }
 
             MarketCurrentPricesItemList = marketCurrentPricesItemList;
             SetAveragePricesString();
@@ -761,63 +808,23 @@ namespace StatisticsAnalysisTool.ViewModels
             return currentStatsPricesTotalList;
         }
 
-        private void FindBestPrice(ref List<MarketResponseTotal> list)
-        {
-            if (list.Count == 0)
-                return;
-
-            var max = GetMaxPrice(list);
-
-            try
-            {
-                if (list.Exists(s => s.BuyPriceMax == max))
-                {
-                    // ReSharper disable once PossibleNullReferenceException
-                    list.Find(s => s?.BuyPriceMax == max).BestBuyMaxPrice = true;
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-
-            var min = GetMinPrice(list);
-
-            try
-            {
-                if (list.Exists(s => s.SellPriceMin == min)) list.First(s => s.SellPriceMin == min).BestSellMinPrice = true;
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-
-        private static ulong GetMaxPrice(List<MarketResponseTotal> list)
+        private static ulong GetMaxPrice(IEnumerable<MainMarketPrices> prices)
         {
             var max = ulong.MinValue;
-            foreach (var type in list)
+            foreach (var type in prices.Where(type => type.BuyPriceMax != 0).Where(type => type.BuyPriceMax > max))
             {
-                if (type.BuyPriceMax == 0)
-                    continue;
-
-                if (type.BuyPriceMax > max)
-                    max = type.BuyPriceMax;
+                max = type.BuyPriceMax;
             }
 
             return max;
         }
 
-        private static ulong GetMinPrice(List<MarketResponseTotal> list)
+        private static ulong GetMinPrice(IEnumerable<MainMarketPrices> prices)
         {
             var min = ulong.MaxValue;
-            foreach (var type in list)
+            foreach (var type in prices.Where(type => type.SellPriceMin != 0).Where(type => type.SellPriceMin < min))
             {
-                if (type.SellPriceMin == 0)
-                    continue;
-
-                if (type.SellPriceMin < min)
-                    min = type.SellPriceMin;
+                min = type.SellPriceMin;
             }
 
             return min;
@@ -834,13 +841,25 @@ namespace StatisticsAnalysisTool.ViewModels
 
             foreach (var price in cityPrices)
             {
-                if (price.SellPriceMin != 0) sellPriceMin.Add(price.SellPriceMin);
+                if (price.SellPriceMin != 0)
+                {
+                    sellPriceMin.Add(price.SellPriceMin);
+                }
 
-                if (price.SellPriceMax != 0) sellPriceMax.Add(price.SellPriceMax);
+                if (price.SellPriceMax != 0)
+                {
+                    sellPriceMax.Add(price.SellPriceMax);
+                }
 
-                if (price.BuyPriceMin != 0) buyPriceMin.Add(price.BuyPriceMin);
+                if (price.BuyPriceMin != 0)
+                {
+                    buyPriceMin.Add(price.BuyPriceMin);
+                }
 
-                if (price.BuyPriceMax != 0) buyPriceMax.Add(price.BuyPriceMax);
+                if (price.BuyPriceMax != 0)
+                {
+                    buyPriceMax.Add(price.BuyPriceMax);
+                }
             }
 
             var sellPriceMinAverage = Average(sellPriceMin.ToArray());
@@ -978,7 +997,7 @@ namespace StatisticsAnalysisTool.ViewModels
             }
         }
 
-        public ObservableCollection<CurrentMarketPrices> CurrentMarketPrices
+        public ObservableCollection<MainMarketPrices> CurrentMarketPrices
         {
             get => _currentMarketPrices;
             set

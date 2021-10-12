@@ -1538,8 +1538,8 @@
     </DataTemplate>
 
     <!-- Item Window - Market -->
-    <DataTemplate DataType="{x:Type itemWindowModel:CurrentMarketPrices}">
+    <!--<DataTemplate DataType="{x:Type itemWindowModel:MainMarketPrices}">
         
-    </DataTemplate>
+    </DataTemplate>-->
 
 </ResourceDictionary>

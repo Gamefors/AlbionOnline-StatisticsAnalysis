@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace StatisticsAnalysisTool.Models.ItemWindowModel
 {
-    public class CurrentMarketPrices : INotifyPropertyChanged
+    public class MainMarketPrices : INotifyPropertyChanged
     {
         private static readonly DateTime zeroDate = new (1,1,1,0,0,0);
 
@@ -30,8 +30,15 @@ namespace StatisticsAnalysisTool.Models.ItemWindowModel
         private string _sellPriceMaxDateString;
         private string _buyPriceMinDateString;
         private string _buyPriceMaxDateString;
+        private bool _bestSellMinPrice;
+        private bool _bestSellMaxPrice;
+        private bool _bestBuyMinPrice;
+        private bool _bestBuyMaxPrice;
+        private Style _sellPriceMinStyle = Application.Current.FindResource("ListView.Grid.StackPanel.Label.Price") as Style;
+        private Style _buyPriceMaxStyle = Application.Current.FindResource("ListView.Grid.StackPanel.Label.Price") as Style;
+        private Style _sellPriceMinDateStyle;
 
-        public CurrentMarketPrices(MarketResponse marketResponse)
+        public MainMarketPrices(MarketResponse marketResponse)
         {
             SellPriceMinDate = zeroDate;
             SellPriceMaxDate = zeroDate;
@@ -133,8 +140,9 @@ namespace StatisticsAnalysisTool.Models.ItemWindowModel
             set
             {
                 _sellPriceMinDate = value;
-                SellPriceMinDateLastUpdateTime = Formatting.DateTimeToLastUpdateTime(SellPriceMinDate);
+                SellPriceMinDateLastUpdateTime = Formatting.DateTimeToLastUpdateTime(value);
                 SellPriceMinDateString = Formatting.CurrentDateTimeFormat(value);
+                SellPriceMinDateStyle = ItemController.GetStyleByTimestamp(value);
                 OnPropertyChanged();
             }
         }
@@ -285,19 +293,79 @@ namespace StatisticsAnalysisTool.Models.ItemWindowModel
             }
         }
 
-        // TODO: OnPropertyChanged für best werte und style einbauen
-        public bool BestSellMinPrice { get; set; }
-        public bool BestSellMaxPrice { get; set; }
-        public bool BestBuyMinPrice { get; set; }
-        public bool BestBuyMaxPrice { get; set; }
+        public bool BestSellMinPrice
+        {
+            get => _bestSellMinPrice;
+            set
+            {
+                _bestSellMinPrice = value;
+                SellPriceMinStyle = ItemController.PriceStyle(value);
+                OnPropertyChanged();
+            }
+        }
+
+        public bool BestSellMaxPrice
+        {
+            get => _bestSellMaxPrice;
+            set
+            {
+                _bestSellMaxPrice = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool BestBuyMinPrice
+        {
+            get => _bestBuyMinPrice;
+            set
+            {
+                _bestBuyMinPrice = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool BestBuyMaxPrice
+        {
+            get => _bestBuyMaxPrice;
+            set
+            {
+                _bestBuyMaxPrice = value;
+                BuyPriceMaxStyle = ItemController.PriceStyle(value);
+                OnPropertyChanged();
+            }
+        }
+
+        public Style SellPriceMinStyle
+        {
+            get => _sellPriceMinStyle;
+            set
+            {
+                _sellPriceMinStyle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Style BuyPriceMaxStyle
+        {
+            get => _buyPriceMaxStyle;
+            set
+            {
+                _buyPriceMaxStyle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Style SellPriceMinDateStyle
+        {
+            get => _sellPriceMinDateStyle;
+            set
+            {
+                _sellPriceMinDateStyle = value;
+                OnPropertyChanged();
+            }
+        }
 
         public Style LocationStyle => ItemController.LocationStyle(Location);
-
-        public Style SellPriceMinStyle => ItemController.PriceStyle(BestSellMinPrice);
-
-        public Style BuyPriceMaxStyle => ItemController.PriceStyle(BestBuyMaxPrice);
-
-        public Style SellPriceMinDateStyle => ItemController.GetStyleByTimestamp(SellPriceMinDate);
 
         public Style SellPriceMaxDateStyle => ItemController.GetStyleByTimestamp(SellPriceMaxDate);
 

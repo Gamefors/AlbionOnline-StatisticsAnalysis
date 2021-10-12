@@ -13,7 +13,7 @@ namespace StatisticsAnalysisTool.Models
         public string ShowVillages => LanguageController.Translation("SHOW_VILLAGES");
         public string AutoUpdateData => LanguageController.Translation("AUTO_UPDATE_DATA");
         public string LastUpdate => LanguageController.Translation("LAST_UPDATE");
-        public string City => LanguageController.Translation("CITY");
+        public static string City => LanguageController.Translation("CITY");
         public string SellPriceMin => LanguageController.Translation("SELL_PRICE_MIN");
         public string SellPriceMinDate => LanguageController.Translation("SELL_PRICE_MIN_DATE");
         public string SellPriceMax => LanguageController.Translation("SELL_PRICE_MAX");
