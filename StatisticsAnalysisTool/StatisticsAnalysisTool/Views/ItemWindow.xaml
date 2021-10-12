@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa5="http://schemas.fontawesome.com/icons/"
+        xmlns:itemWindowModel="clr-namespace:StatisticsAnalysisTool.Models.ItemWindowModel"
         mc:Ignorable="d"
         Title="ItemWindow" MinHeight="350" Height="420" MinWidth="900" Width="1210" AllowsTransparency="True" Style="{StaticResource PrimaryWindow}" FontSize="{StaticResource BaseFontSize}" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
     <Grid>
@@ -58,24 +59,23 @@
                         <GridView>
                             <GridViewColumn Header="{Binding Translation.City, FallbackValue=CITY}" Width="160">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Label Height="28" Width="150" Margin="0" 
                                                Content="{Binding LocationName}" 
-                                               Style="{Binding LocationStyle}" 
-                                               MouseDoubleClick="MarketListCityLabel_MouseDoubleClick"
-                                               d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                               Style="{Binding LocationStyle}"
+                                               MouseDoubleClick="MarketListCityLabel_MouseDoubleClick" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.SellPriceMin, FallbackValue=SELL_PRICE_MIN}" Width="120">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Price}">
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Price}">
                                                 <Label Style="{Binding SellPriceMinStyle}" 
                                                        Content="{Binding SellPriceMin}" 
-                                                       MouseDoubleClick="MarketListSellPriceMinLabel_MouseDoubleClick" 
-                                                       d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                       ContentStringFormat="{}{0:N0}"
+                                                       MouseDoubleClick="MarketListSellPriceMinLabel_MouseDoubleClick"/>
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Icon}">
                                                 <Image Style="{StaticResource ListView.Grid.StackPanel.Image.Price.Silver}" />
@@ -86,26 +86,25 @@
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.SellPriceMinDate, FallbackValue=SELL_PRICE_MIN_DATE}" Width="126">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Date}">
                                             <Label Style="{Binding SellPriceMinDateStyle}" 
                                                    Content="{Binding SellPriceMinDateLastUpdateTime}" 
-                                                   ToolTip="{Binding SellPriceMinDateString}" 
-                                                   d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                   ToolTip="{Binding SellPriceMinDateString}" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.SellPriceMax, FallbackValue=SELL_PRICE_MAX}" Width="120">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Price}">
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Price}">
                                                 <Label Style="{StaticResource ListView.Grid.StackPanel.Label.Price}" 
                                                        Content="{Binding SellPriceMax}" 
                                                        ToolTip="{Binding SellPriceMaxDateString}" 
-                                                       MouseDoubleClick="MarketListSellPriceMaxLabel_MouseDoubleClick" 
-                                                       d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                       ContentStringFormat="{}{0:N0}"
+                                                       MouseDoubleClick="MarketListSellPriceMaxLabel_MouseDoubleClick" />
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Icon}">
                                                 <Image Style="{StaticResource ListView.Grid.StackPanel.Image.Price.Silver}" />
@@ -116,25 +115,24 @@
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.SellPriceMaxDate, FallbackValue=SELL_PRICE_MAX_DATE}" Width="126">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Date}">
                                             <Label Style="{Binding SellPriceMaxDateStyle}" 
                                                    Content="{Binding SellPriceMaxDateLastUpdateTime}" 
-                                                   ToolTip="{Binding SellPriceMaxDateString}" 
-                                                   d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                   ToolTip="{Binding SellPriceMaxDateString}" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.BuyPriceMin, FallbackValue=BUY_PRICE_MIN}" Width="120">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Price}">
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Price}">
                                                 <Label Style="{StaticResource ListView.Grid.StackPanel.Label.Price}" 
                                                        Content="{Binding BuyPriceMin}" 
-                                                       MouseDoubleClick="MarketListBuyPriceMinLabel_MouseDoubleClick" 
-                                                       d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                       ContentStringFormat="{}{0:N0}"
+                                                       MouseDoubleClick="MarketListBuyPriceMinLabel_MouseDoubleClick" />
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Icon}">
                                                 <Image Style="{StaticResource ListView.Grid.StackPanel.Image.Price.Silver}" />
@@ -145,25 +143,24 @@
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.BuyPriceMinDate, FallbackValue=BUY_PRICE_MIN_DATE}" Width="126">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Date}">
                                             <Label Style="{Binding BuyPriceMinDateStyle}" 
                                                    Content="{Binding BuyPriceMinDateLastUpdateTime}" 
-                                                   ToolTip="{Binding BuyPriceMinDateString}" 
-                                                   d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                   ToolTip="{Binding BuyPriceMinDateString}" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.BuyPriceMax, FallbackValue=BUY_PRICE_MAX}" Width="120">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Price}">
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Price}">
                                                 <Label Style="{Binding BuyPriceMaxStyle}" 
                                                        Content="{Binding BuyPriceMax}" 
-                                                       MouseDoubleClick="MarketListBuyPriceMaxLabel_MouseDoubleClick" 
-                                                       d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                       ContentStringFormat="{}{0:N0}"
+                                                       MouseDoubleClick="MarketListBuyPriceMaxLabel_MouseDoubleClick" />
                                             </StackPanel>
                                             <StackPanel Style="{StaticResource ListView.Grid.StackPanel.Item.Icon}">
                                                 <Image Style="{StaticResource ListView.Grid.StackPanel.Image.Price.Silver}" />
@@ -174,12 +171,11 @@
                             </GridViewColumn>
                             <GridViewColumn Header="{Binding Translation.BuyPriceMaxDate, FallbackValue=BUY_PRICE_MAX_DATE}" Width="126">
                                 <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="itemWindowModel:CurrentMarketPrices">
                                         <Grid Style="{StaticResource ListView.Grid.Item.Date}">
                                             <Label Style="{Binding BuyPriceMaxDateStyle}" 
                                                    Content="{Binding BuyPriceMaxDateLastUpdateTime}" 
-                                                   ToolTip="{Binding BuyPriceMaxDateString}" 
-                                                   d:DataContext="{d:DesignData CurrentMarketPrices}" />
+                                                   ToolTip="{Binding BuyPriceMaxDateString}" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
