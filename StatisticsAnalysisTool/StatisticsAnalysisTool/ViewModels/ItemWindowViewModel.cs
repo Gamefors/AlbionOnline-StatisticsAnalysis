@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media.Imaging;
 
@@ -71,7 +72,6 @@ namespace StatisticsAnalysisTool.ViewModels
         private Visibility _requiredJournalVisibility = Visibility.Collapsed;
         private Visibility _craftingTabVisibility = Visibility.Collapsed;
         private EssentialCraftingValuesTemplate _essentialCraftingValues;
-
         private CraftingCalculation _craftingCalculation = new()
         {
             AuctionsHouseTax = 0.0d,
@@ -85,6 +85,9 @@ namespace StatisticsAnalysisTool.ViewModels
             TotalResourceCosts = 0.0d,
             GrandTotal = 0.0d
         };
+
+        private ListCollectionView _currentMarketPricesCollectionView;
+        private ObservableCollection<CurrentMarketPrices> _currentMarketPrices = new();
 
         public ItemWindowViewModel(ItemWindow mainWindow, Item item)
         {
@@ -147,9 +150,70 @@ namespace StatisticsAnalysisTool.ViewModels
                 _mainWindow.Title = $"{localizedName} (T{item.Tier})";
             });
 
-            StartAutoUpdater();
+            CurrentMarketPricesCollectionView = new ListCollectionView(CurrentMarketPrices);
+
+            //StartAutoUpdater();
+            await AutoUpdateMarketPricesAsync();
             RefreshSpin = IsAutoUpdateActive;
         }
+
+        public async Task AutoUpdateMarketPricesAsync()
+        {
+            while (RunUpdate)
+            {
+                await Task.Delay(100);
+                if (!IsAutoUpdateActive)
+                {
+                    continue;
+                }
+
+                if (Item.UniqueName != null)
+                {
+                    await GetCityItemPricesAsync().ConfigureAwait(false);
+                    //GetItemPricesInRealMoneyAsync();
+                }
+
+                //GetMainPriceStats();
+                //SetQualityPriceStatsOnListView();
+
+                await Task.Delay(SettingsController.CurrentSettings.RefreshRate - 100);
+            }
+        }
+
+        #region Main tab
+
+        public async Task GetCityItemPricesAsync()
+        {
+            try
+            {
+                var marketPrices = await ApiController.GetCityItemPricesFromJsonAsync(Item.UniqueName).ConfigureAwait(false);
+
+                foreach (var cityMarketPrices in marketPrices)
+                {
+                    var localCityPrices = CurrentMarketPrices?.FirstOrDefault(x => x?.Location == Locations.GetName(cityMarketPrices?.City));
+
+                    if (localCityPrices != null)
+                    {
+                        localCityPrices.SetValues(cityMarketPrices);
+                    }
+                    else
+                    {
+                        await Application.Current.Dispatcher.InvokeAsync(() => CurrentMarketPrices?.Add(new CurrentMarketPrices(cityMarketPrices)));
+                    }
+                }
+
+                ErrorBarReset();
+            }
+            catch (TooManyRequestsException e)
+            {
+                CurrentCityPrices = null;
+                HasItemPrices = false;
+                SetErrorValues(Error.ToManyRequests);
+                Log.Warn(nameof(GetCityItemPricesAsync), e);
+            }
+        }
+
+        #endregion
 
         #region Crafting tab
 
@@ -188,7 +252,7 @@ namespace StatisticsAnalysisTool.ViewModels
             {
                 var item = GetSuitableResourceItem(craftResource.UniqueName);
                 var craftingQuantity = (long)Math.Round(item?.UniqueName?.ToUpper().Contains("ARTEFACT") ?? false ? CraftingCalculation.PossibleItemCrafting : EssentialCraftingValues.CraftingItemQuantity, MidpointRounding.ToPositiveInfinity);
-                
+
                 RequiredResources.Add(new RequiredResource(this)
                 {
                     CraftingResourceName = item?.LocalizedName,
@@ -388,22 +452,6 @@ namespace StatisticsAnalysisTool.ViewModels
                     await Task.Delay(SettingsController.CurrentSettings.RefreshRate - 500);
                 }
             });
-        }
-
-        public async Task GetCityItemPricesAsync()
-        {
-            try
-            {
-                CurrentCityPrices = await ApiController.GetCityItemPricesFromJsonAsync(Item.UniqueName).ConfigureAwait(false);
-                ErrorBarReset();
-            }
-            catch (TooManyRequestsException e)
-            {
-                CurrentCityPrices = null;
-                HasItemPrices = false;
-                SetErrorValues(Error.ToManyRequests);
-                Log.Warn(nameof(GetCityItemPricesAsync), e);
-            }
         }
 
         private List<int> GetQualities()
@@ -916,6 +964,26 @@ namespace StatisticsAnalysisTool.ViewModels
             set
             {
                 _loadingImageSpin = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ListCollectionView CurrentMarketPricesCollectionView
+        {
+            get => _currentMarketPricesCollectionView;
+            set
+            {
+                _currentMarketPricesCollectionView = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<CurrentMarketPrices> CurrentMarketPrices
+        {
+            get => _currentMarketPrices;
+            set
+            {
+                _currentMarketPrices = value;
                 OnPropertyChanged();
             }
         }

@@ -232,12 +232,9 @@ namespace StatisticsAnalysisTool.Common
 
         public static Style PriceStyle(bool bestSellMinPrice)
         {
-            if (bestSellMinPrice)
-            {
-                return Application.Current.FindResource("ListView.Grid.StackPanel.Label.BestPrice") as Style;
-            }
-
-            return Application.Current.FindResource("ListView.Grid.StackPanel.Label.Price") as Style;
+            return bestSellMinPrice
+                ? Application.Current.FindResource("ListView.Grid.StackPanel.Label.BestPrice") as Style
+                : Application.Current.FindResource("ListView.Grid.StackPanel.Label.Price") as Style;
         }
 
         public static ulong GetMinPrice(List<ulong> list)

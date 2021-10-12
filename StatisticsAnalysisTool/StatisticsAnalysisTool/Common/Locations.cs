@@ -141,6 +141,7 @@ namespace StatisticsAnalysisTool.Common
 
     public enum Location
     {
+        Unknown = 0,
         SwampCross = 4,
         Thetford = 7,
         Lymhurst = 1002,

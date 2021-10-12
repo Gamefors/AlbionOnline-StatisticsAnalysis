@@ -1536,4 +1536,10 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
+
+    <!-- Item Window - Market -->
+    <DataTemplate DataType="{x:Type itemWindowModel:CurrentMarketPrices}">
+        
+    </DataTemplate>
+
 </ResourceDictionary>

@@ -1697,7 +1697,7 @@ namespace StatisticsAnalysisTool.ViewModels
                 OnPropertyChanged();
             }
         }
-        
+
         public ObservableCollection<TrackingNotification> TrackingNotifications
         {
             get => _trackingNotifications;
@@ -1717,7 +1717,7 @@ namespace StatisticsAnalysisTool.ViewModels
                 OnPropertyChanged();
             }
         }
-        
+
         public ListCollectionView TrackingDungeonsCollectionView {
             get => _trackingDungeonsCollectionView;
             set
