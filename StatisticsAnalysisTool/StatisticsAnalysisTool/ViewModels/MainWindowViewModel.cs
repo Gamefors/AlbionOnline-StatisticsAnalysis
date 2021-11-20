@@ -28,6 +28,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+
 // ReSharper disable UnusedMember.Global
 
 namespace StatisticsAnalysisTool.ViewModels
@@ -152,6 +155,8 @@ namespace StatisticsAnalysisTool.ViewModels
         private bool _isTrackingPartyLootOnly;
         private bool _isTrackingSilver;
         private bool _isTrackingFame;
+        private ObservableCollection<ISeries> _seriesDashboardHourValues;
+        private Axis[] _xAxesDashboardHourValues;
 
         public MainWindowViewModel(MainWindow mainWindow)
         {
@@ -882,6 +887,8 @@ namespace StatisticsAnalysisTool.ViewModels
 
         #region Tracking Mode
 
+        #region Generally Tracking
+
         public void TrackerActivationToggle()
         {
             if (!IsReadyToTracking())
@@ -951,28 +958,6 @@ namespace StatisticsAnalysisTool.ViewModels
             TrackingController?.CountUpTimer?.Reset();
         }
 
-        public void ResetDamageMeter()
-        {
-            var dialog = new DialogWindow(LanguageController.Translation("RESET_DAMAGE_METER"), LanguageController.Translation("SURE_YOU_WANT_TO_RESET_DAMAGE_METER"));
-            var dialogResult = dialog.ShowDialog();
-
-            if (dialogResult is true)
-            {
-                TrackingController.CombatController.ResetDamageMeter();
-            }
-        }
-
-        public void ResetDungeons()
-        {
-            var dialog = new DialogWindow(LanguageController.Translation("RESET_DUNGEON_TRACKER"), LanguageController.Translation("SURE_YOU_WANT_TO_RESET_DUNGEON_TRACKER"));
-            var dialogResult = dialog.ShowDialog();
-
-            if (dialogResult is true)
-            {
-                TrackingController.DungeonController.ResetDungeons();
-            }
-        }
-
         public async Task ResetTrackingNotificationsAsync()
         {
             var dialog = new DialogWindow(LanguageController.Translation("RESET_TRACKING_NOTIFICATIONS"), LanguageController.Translation("SURE_YOU_WANT_TO_RESET_TRACKING_NOTIFICATIONS"));
@@ -995,6 +980,10 @@ namespace StatisticsAnalysisTool.ViewModels
                 await TrackingController.EntityController.ResetPartyMemberAsync();
             }
         }
+
+        #endregion
+
+        #region Dungeon Tracking
 
         public void DeleteSelectedDungeons()
         {
@@ -1023,13 +1012,28 @@ namespace StatisticsAnalysisTool.ViewModels
             DungeonStatsDay.OpenedLegendaryChests = 0;
         }
 
+        public void ResetDungeons()
+        {
+            var dialog = new DialogWindow(LanguageController.Translation("RESET_DUNGEON_TRACKER"), LanguageController.Translation("SURE_YOU_WANT_TO_RESET_DUNGEON_TRACKER"));
+            var dialogResult = dialog.ShowDialog();
+
+            if (dialogResult is true)
+            {
+                TrackingController.DungeonController.ResetDungeons();
+            }
+        }
+
+        #endregion
+
+        #region Damage Meter
+
         public void SetDamageMeterSort()
         {
             switch (DamageMeterSortSelection.DamageMeterSortType)
             {
                 case DamageMeterSortType.Damage:
                     SetIsDamageMeterShowing(DamageMeter, true);
-                    DamageMeter.OrderByReference(DamageMeter.OrderByDescending(x => x.DamageInPercent).ToList()); 
+                    DamageMeter.OrderByReference(DamageMeter.OrderByDescending(x => x.DamageInPercent).ToList());
                     return;
                 case DamageMeterSortType.Dps:
                     SetIsDamageMeterShowing(DamageMeter, true);
@@ -1093,6 +1097,25 @@ namespace StatisticsAnalysisTool.ViewModels
         {
             IsDamageMeterTrackingActive = !IsDamageMeterTrackingActive;
         }
+
+        public void ResetDamageMeter()
+        {
+            var dialog = new DialogWindow(LanguageController.Translation("RESET_DAMAGE_METER"), LanguageController.Translation("SURE_YOU_WANT_TO_RESET_DAMAGE_METER"));
+            var dialogResult = dialog.ShowDialog();
+
+            if (dialogResult is true)
+            {
+                TrackingController.CombatController.ResetDamageMeter();
+            }
+        }
+
+        #endregion
+
+        #region Tracking Dashboard
+
+
+
+        #endregion
 
         #endregion
 
@@ -1429,6 +1452,26 @@ namespace StatisticsAnalysisTool.ViewModels
 
                 _ = TrackingController?.NotificationUiFilteringAsync();
                 SettingsController.CurrentSettings.IsMainTrackerFilterSeasonPoints = _isTrackingFilteredSeasonPoints;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<ISeries> SeriesDashboardHourValues
+        {
+            get => _seriesDashboardHourValues;
+            set
+            {
+                _seriesDashboardHourValues = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Axis[] XAxesDashboardHourValues
+        {
+            get => _xAxesDashboardHourValues;
+            set
+            {
+                _xAxesDashboardHourValues = value;
                 OnPropertyChanged();
             }
         }

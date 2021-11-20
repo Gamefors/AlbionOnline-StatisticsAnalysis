@@ -21,7 +21,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace StatisticsAnalysisTool.ViewModels
 {
@@ -449,7 +452,7 @@ namespace StatisticsAnalysisTool.ViewModels
                 NormalQualityChecked = true;
             }
         }
-
+        
         #region History
 
         public async void SetHistoryChartPricesAsync()

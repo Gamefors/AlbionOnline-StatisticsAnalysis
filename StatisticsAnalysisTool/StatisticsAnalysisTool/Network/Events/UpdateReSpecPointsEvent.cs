@@ -8,7 +8,10 @@ namespace StatisticsAnalysisTool.Network.Events
 {
     public class UpdateReSpecPointsEvent
     {
-        public FixPoint? CurrentReSpecPoints { get; }
+        public FixPoint? CurrentTotalReSpecPoints { get; }
+        public FixPoint GainedReSpecPoints { get; }
+
+        private readonly double? _lastReSpecValue;
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
@@ -22,22 +25,33 @@ namespace StatisticsAnalysisTool.Network.Events
                 {
                     var parameterType = parameters[0].GetType();
 
-                    if(parameterType.Name == "Int32[]") 
+                    switch (parameterType.Name)
                     {
-                        var reSpecPointsArray = ((int[])parameters[0]).ToDictionary();
-
-                        if (reSpecPointsArray?.Count > 0 && reSpecPointsArray.ContainsKey(1))
+                        case "Int32[]":
                         {
-                            CurrentReSpecPoints = FixPoint.FromInternalValue(reSpecPointsArray[1].ObjectToLong() ?? 0);
+                            var reSpecPointsArray = ((int[])parameters[0]).ToDictionary();
+
+                            if (reSpecPointsArray?.Count > 0 && reSpecPointsArray.ContainsKey(1))
+                            {
+                                CurrentTotalReSpecPoints = FixPoint.FromInternalValue(reSpecPointsArray[1].ObjectToLong() ?? 0);
+                                Utilities.AddValue(CurrentTotalReSpecPoints.Value.DoubleValue, _lastReSpecValue, out _lastReSpecValue);
+                                GainedReSpecPoints = _lastReSpecValue != null ? FixPoint.FromFloatingPointValue((double)_lastReSpecValue) : FixPoint.FromFloatingPointValue(0);
+                            }
+
+                            break;
                         }
-                    } 
-                    else if(parameterType.Name == "Int64[]") 
-                    {
-                        var reSpecPointsArray = ((long[])parameters[0]).ToDictionary();
-
-                        if (reSpecPointsArray?.Count > 0 && reSpecPointsArray.ContainsKey(1))
+                        case "Int64[]":
                         {
-                            CurrentReSpecPoints = FixPoint.FromInternalValue(reSpecPointsArray[1].ObjectToLong() ?? 0);
+                            var reSpecPointsArray = ((long[])parameters[0]).ToDictionary();
+
+                            if (reSpecPointsArray?.Count > 0 && reSpecPointsArray.ContainsKey(1))
+                            {
+                                CurrentTotalReSpecPoints = FixPoint.FromInternalValue(reSpecPointsArray[1].ObjectToLong() ?? 0);
+                                Utilities.AddValue(CurrentTotalReSpecPoints.Value.DoubleValue, _lastReSpecValue, out _lastReSpecValue);
+                                GainedReSpecPoints = _lastReSpecValue != null ? FixPoint.FromFloatingPointValue((double)_lastReSpecValue) : FixPoint.FromFloatingPointValue(0);
+                            }
+
+                            break;
                         }
                     }
                 }

@@ -216,7 +216,6 @@ public class AlbionPackageParser : PhotonParser
     private async Task TakeSilverEventHandlerAsync(Dictionary<byte, object> parameters)
     {
         var value = new TakeSilverEvent(parameters);
-
         var updateFameEventHandler = new TakeSilverEventHandler(_trackingController);
         await updateFameEventHandler.OnActionAsync(value);
     }
