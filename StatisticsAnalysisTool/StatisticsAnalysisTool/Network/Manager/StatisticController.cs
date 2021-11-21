@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Net.Mime;
-using System.Windows;
-using System.Windows.Media;
 using Divis.AsyncObservableCollection;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
@@ -13,8 +5,14 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using StatisticsAnalysisTool.Common;
-using StatisticsAnalysisTool.Models;
 using StatisticsAnalysisTool.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Media;
 using ValueType = StatisticsAnalysisTool.Enumerations.ValueType;
 
 namespace StatisticsAnalysisTool.Network.Manager
@@ -24,9 +22,9 @@ namespace StatisticsAnalysisTool.Network.Manager
         private readonly TrackingController _trackingController;
         private readonly MainWindowViewModel _mainWindowViewModel;
         private readonly AsyncObservableCollection<DashboardHourObject> _stats = new();
-        private readonly List<ValueType> _valueTypes = new () { ValueType.Fame, ValueType.Silver, ValueType.ReSpec, ValueType.FactionFame, ValueType.FactionPoints};
+        private readonly List<ValueType> _valueTypes = new() { ValueType.Fame, ValueType.Silver, ValueType.ReSpec, ValueType.FactionFame, ValueType.FactionPoints };
         private double? _lastReSpecValue;
-        private double? _lastSilverValue;
+        private DateTime _lastChartUpdate;
 
         public StatisticController(TrackingController trackingController, MainWindowViewModel mainWindowViewModel)
         {
@@ -77,11 +75,16 @@ namespace StatisticsAnalysisTool.Network.Manager
 
             dbHourValues.Value += gainedValue;
 
-            UpdateChart(_stats);
+            UpdateHourChart(_stats);
         }
 
-        private void UpdateChart(ObservableCollection<DashboardHourObject> stats)
+        private void UpdateHourChart(ObservableCollection<DashboardHourObject> stats)
         {
+            if (!IsUpdateChartAllowed())
+            {
+                return;
+            }
+
             var date = new List<string>();
             var seriesCollection = new ObservableCollection<ISeries>();
             var xAxes = new ObservableCollection<Axis>();
@@ -105,7 +108,10 @@ namespace StatisticsAnalysisTool.Network.Manager
                 {
                     Name = dashboardHourObject.Type.ToString(),
                     Values = amount,
-                    Fill = GetValueTypeBrush(dashboardHourObject.Type, true),
+                    Fill = new SolidColorPaint
+                    {
+                        Color = new SKColor(0, 0, 0, 0)
+                    },
                     Stroke = GetValueTypeBrush(dashboardHourObject.Type, false),
                     GeometryStroke = GetValueTypeBrush(dashboardHourObject.Type, false),
                     GeometryFill = GetValueTypeBrush(dashboardHourObject.Type, true),
@@ -125,6 +131,13 @@ namespace StatisticsAnalysisTool.Network.Manager
 
             _mainWindowViewModel.XAxesDashboardHourValues = xAxes.ToArray();
             _mainWindowViewModel.SeriesDashboardHourValues = seriesCollection;
+
+            _lastChartUpdate = DateTime.Now;
+        }
+
+        private bool IsUpdateChartAllowed()
+        {
+            return DateTime.Now > _lastChartUpdate.AddSeconds(20);
         }
 
         public static SolidColorPaint GetValueTypeBrush(ValueType valueType, bool transparent)
@@ -155,11 +168,6 @@ namespace StatisticsAnalysisTool.Network.Manager
             }
         }
 
-        private void UpdateHourObjectsByTime()
-        {
-            
-        }
-
         private double GetGainedValue(ValueType type, double gainedValue)
         {
             switch (type)
@@ -174,7 +182,7 @@ namespace StatisticsAnalysisTool.Network.Manager
         private class DashboardHourObject
         {
             public ValueType Type { get; init; }
-            public ObservableCollection<DashboardHourValues> HourValues { get; } = new ();
+            public ObservableCollection<DashboardHourValues> HourValues { get; } = new();
         }
 
         private class DashboardHourValues
@@ -183,7 +191,7 @@ namespace StatisticsAnalysisTool.Network.Manager
             public DateTime Date { get; init; }
             public int Hour => Date.Hour;
         }
-        
+
         #endregion
     }
 }
