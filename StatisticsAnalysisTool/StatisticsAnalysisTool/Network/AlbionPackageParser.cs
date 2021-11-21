@@ -37,6 +37,7 @@ public class AlbionPackageParser : PhotonParser
     private readonly ActiveSpellEffectsUpdateEventHandler ActiveSpellEffectsUpdateEventHandler;
     private readonly UpdateFactionStandingEventHandler UpdateFactionStandingEventHandler;
     private readonly ReceivedSeasonPointsEventHandler ReceivedSeasonPointsEventHandler;
+    private readonly MightFavorPointsEventHandler MightFavorPointsEventHandler;
 
     private readonly UseShrineRequestHandler UseShrineRequestHandler;
 
@@ -70,6 +71,7 @@ public class AlbionPackageParser : PhotonParser
         ActiveSpellEffectsUpdateEventHandler = new ActiveSpellEffectsUpdateEventHandler(trackingController);
         UpdateFactionStandingEventHandler = new UpdateFactionStandingEventHandler(trackingController);
         ReceivedSeasonPointsEventHandler = new ReceivedSeasonPointsEventHandler(trackingController);
+        MightFavorPointsEventHandler = new MightFavorPointsEventHandler(trackingController);
 
         UseShrineRequestHandler = new UseShrineRequestHandler(trackingController);
 
@@ -164,6 +166,9 @@ public class AlbionPackageParser : PhotonParser
                     return;
                 case EventCodes.ReceivedSeasonPoints:
                     await ReceivedSeasonPointsEventHandlerAsync(parameters).ConfigureAwait(false);
+                    return;
+                case EventCodes.MightFavorPoints:
+                    await MightFavorPointsEventHandlerAsync(parameters).ConfigureAwait(false);
                     return;
             }
         });
@@ -387,6 +392,12 @@ public class AlbionPackageParser : PhotonParser
     {
         var value = new ReceivedSeasonPointsEvent(parameters);
         await ReceivedSeasonPointsEventHandler.OnActionAsync(value);
+    }
+
+    private async Task MightFavorPointsEventHandlerAsync(Dictionary<byte, object> parameters)
+    {
+        var value = new MightFavorPointsEvent(parameters);
+        await MightFavorPointsEventHandler.OnActionAsync(value);
     }
 
     #endregion

@@ -22,7 +22,7 @@ namespace StatisticsAnalysisTool.Network.Manager
         private readonly TrackingController _trackingController;
         private readonly MainWindowViewModel _mainWindowViewModel;
         private readonly AsyncObservableCollection<DashboardHourObject> _stats = new();
-        private readonly List<ValueType> _valueTypes = new() { ValueType.Fame, ValueType.Silver, ValueType.ReSpec, ValueType.FactionFame, ValueType.FactionPoints };
+        private readonly List<ValueType> _valueTypes = new() { ValueType.Fame, ValueType.Silver, ValueType.ReSpec, ValueType.FactionFame, ValueType.FactionPoints, ValueType.Might, ValueType.Favor };
         private double? _lastReSpecValue;
         private DateTime _lastChartUpdate;
 
