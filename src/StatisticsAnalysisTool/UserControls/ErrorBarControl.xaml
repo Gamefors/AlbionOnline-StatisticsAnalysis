@@ -9,7 +9,7 @@
 
     <Grid ZIndex="2" Style="{StaticResource Grid.Error.Bar}" Visibility="{Binding ErrorBarVisibility}">
         <Button Style="{StaticResource Window.Error.Bar.Button.Style}" Content="r" Margin="0,0,7,0" Click="BtnErrorBar_Click" />
-        <Label Style="{StaticResource Grid.Error.Bar.Label}" Content="{Binding ErrorBarText, FallbackValue=ERROR}" />
+        <Label Style="{StaticResource Grid.Error.Bar.Label}" Content="{Binding ErrorBarText, FallbackValue=ERROR__MESSAGE}" />
         <Border BorderThickness="1,0,0,0" BorderBrush="{StaticResource SolidColorBrush.Error.Bar.Border}" />
         <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource SolidColorBrush.Error.Bar.Border}" />
         <Border BorderThickness="0,0,1,0" BorderBrush="{StaticResource SolidColorBrush.Error.Bar.Border}" />
