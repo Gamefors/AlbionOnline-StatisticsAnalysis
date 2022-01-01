@@ -61,6 +61,7 @@ namespace StatisticsAnalysisTool.Models
         public static string UnknownLoot => LanguageController.Translation("UNKNOWN_LOOT");
         public static string OpenExtendedDamageMeterWindow => LanguageController.Translation("OPEN_EXTENDED_DAMAGE_METER_WINDOW");
         public static string CopyToClipboard => LanguageController.Translation("COPY_TO_CLIPBOARD");
+        public static string PostToDiscord => LanguageController.Translation("POST_TO_DISCORD");
         public static string MapHistory => LanguageController.Translation("MAP_HISTORY");
         public static string TryDownloadingTheItemListAgain => LanguageController.Translation("TRY_DOWNLOADING_THE_ITEM_LIST_AGAIN");
         public static string DamageMeterOnOff => LanguageController.Translation("DAMAGE_METER_ON_OFF");

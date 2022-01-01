@@ -8,6 +8,8 @@ using log4net;
 using StatisticsAnalysisTool.Common;
 using StatisticsAnalysisTool.Enumerations;
 using StatisticsAnalysisTool.Views;
+using Discord.Webhook;
+using Discord;
 
 namespace StatisticsAnalysisTool.UserControls
 {
@@ -17,7 +19,7 @@ namespace StatisticsAnalysisTool.UserControls
     public partial class DamageMeterControl
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
-
+        private DiscordWebhookClient DiscordWebhookClient = null;
         public DamageMeterControl()
         {
             InitializeComponent();
@@ -91,6 +93,53 @@ namespace StatisticsAnalysisTool.UserControls
             }
         }
 
+        public void PostDamageToDiscord()
+        {
+            var vm = (MainWindowViewModel)DataContext;
+            var output = string.Empty;
+            var counter = 1;
+            if (vm?.DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Damage)
+            {
+                output = vm.DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage} ({entity.DamagePercentage:N2}%) | {entity.Dps:N2} DPS\n");
+            }
+
+            if (vm?.DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Dps)
+            {
+                output = vm.DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Dps:N2} DPS\n");
+            }
+
+            if (vm?.DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Heal)
+            {
+                output = vm.DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Heal} Heal\n");
+            }
+
+            if (vm?.DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Hps)
+            {
+                output = vm.DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Hps:N2} HPS\n");
+            }
+
+            if (vm?.DamageMeterSortSelection.DamageMeterSortType == DamageMeterSortType.Name)
+            {
+                output = vm.DamageMeter.Aggregate(output, (current, entity) => current + $"{counter++}. {entity.Name}: {entity.Damage} ({entity.DamagePercentage:N2}%) | {entity.Dps:N2} DPS\n");
+            }
+
+
+            if (vm?.DiscordWebhookUrl.Length != 0 && output.Length != 0)
+            {
+                DiscordWebhookClient = new DiscordWebhookClient(vm?.DiscordWebhookUrl);
+                var embed = new EmbedBuilder
+                {
+                    Title = $"AlbionOnline-StatisticsAnalysis | Sort By {vm?.DamageMeterSortSelection.DamageMeterSortType.ToString()}",
+                    Description = output,
+                    Color = Color.Red
+                };
+
+                DiscordWebhookClient.SendMessageAsync(embeds: new[] { embed.Build() });
+
+            }
+            
+        }
+
         public void DamageMeterActivationToggle()
         {
             if (DataContext is MainWindowViewModel vm)
@@ -126,6 +175,11 @@ namespace StatisticsAnalysisTool.UserControls
         private void CopyDamageMeterToClipboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
             CopyDamageMeterToClipboard();
+        }
+
+        private void PostDamageMeterToDiscord_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            PostDamageToDiscord();
         }
 
         private void DamageMeterModeActiveToggle_MouseUp(object sender, MouseButtonEventArgs e)

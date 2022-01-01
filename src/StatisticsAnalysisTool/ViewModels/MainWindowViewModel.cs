@@ -145,6 +145,7 @@ namespace StatisticsAnalysisTool.ViewModels
         private ObservableCollection<ISeries> _seriesDashboardHourValues;
         private DashboardObject _dashboardObject = new ();
         private string _loggingSearchText;
+        public string _discordWebhookUrl;
 
         public MainWindowViewModel(MainWindow mainWindow)
         {
@@ -210,6 +211,8 @@ namespace StatisticsAnalysisTool.ViewModels
             SavedPlayerInformationName = SettingsController.CurrentSettings.SavedPlayerInformationName;
 
             #endregion Player information
+
+            DiscordWebhookUrl = SettingsController.CurrentSettings.DiscordWebhookUrl;
 
             #region Tracking
 
@@ -2158,6 +2161,17 @@ namespace StatisticsAnalysisTool.ViewModels
             set
             {
                 _numberOfValuesTranslation = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string DiscordWebhookUrl
+        {
+            get => _discordWebhookUrl;
+            set
+            {
+                _discordWebhookUrl = value;
+                SettingsController.CurrentSettings.DiscordWebhookUrl = _discordWebhookUrl;
                 OnPropertyChanged();
             }
         }

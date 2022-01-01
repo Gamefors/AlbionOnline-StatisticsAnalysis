@@ -14,6 +14,7 @@ namespace StatisticsAnalysisTool.ViewModels
 {
     public class SettingsWindowViewModel : INotifyPropertyChanged
     {
+        private static string _discordWebhookUrl;
         private static string _itemListSourceUrl;
         private static ObservableCollection<FileInformation> _languages = new();
         private static FileInformation _languagesSelection;
@@ -93,6 +94,7 @@ namespace StatisticsAnalysisTool.ViewModels
             UpdateItemListByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_28_DAYS"), Value = 28 });
             UpdateItemListByDaysSelection = UpdateItemListByDays.FirstOrDefault(x => x.Value == SettingsController.CurrentSettings.UpdateItemListByDays);
 
+            DiscordWebhookUrl = SettingsController.CurrentSettings.DiscordWebhookUrl;
             ItemListSourceUrl = SettingsController.CurrentSettings.ItemListSourceUrl;
             IsOpenItemWindowInNewWindowChecked = SettingsController.CurrentSettings.IsOpenItemWindowInNewWindowChecked;
             ShowInfoWindowOnStartChecked = SettingsController.CurrentSettings.IsInfoWindowShownOnStart;
@@ -130,6 +132,7 @@ namespace StatisticsAnalysisTool.ViewModels
 
         public void SaveSettings()
         {
+            SettingsController.CurrentSettings.DiscordWebhookUrl = DiscordWebhookUrl;
             SettingsController.CurrentSettings.ItemListSourceUrl = ItemListSourceUrl;
             SettingsController.CurrentSettings.RefreshRate = RefreshRatesSelection.Value;
             SettingsController.CurrentSettings.UpdateItemListByDays = UpdateItemListByDaysSelection.Value;
@@ -259,7 +262,15 @@ namespace StatisticsAnalysisTool.ViewModels
                 OnPropertyChanged();
             }
         }
-
+        public string DiscordWebhookUrl
+        {
+            get => _discordWebhookUrl;
+            set
+            {
+                _discordWebhookUrl = value;
+                OnPropertyChanged();
+            }
+        }
         public string ItemListSourceUrl
         {
             get => _itemListSourceUrl;

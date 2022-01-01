@@ -5,6 +5,7 @@
         public string CurrentLanguageCultureName { get; set; } = "en-US";
         public int RefreshRate { get; set; } = 10000;
         public int UpdateItemListByDays { get; set; } = 7;
+        public string DiscordWebhookUrl { get; set; } = "";
         public string ItemListSourceUrl { get; set; } = "https://raw.githubusercontent.com/broderickhyman/ao-bin-dumps/master/formatted/items.json";
         public bool IsOpenItemWindowInNewWindowChecked { get; set; } = true;
         public bool IsInfoWindowShownOnStart { get; set; } = true;

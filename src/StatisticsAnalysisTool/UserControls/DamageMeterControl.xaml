@@ -37,6 +37,10 @@
                       ToolTip="{Binding Translation.CopyToClipboard, FallbackValue=COPY__TO__CLIPBOARD}" MouseUp="CopyDamageMeterToClipboard_MouseUp">
                     <fa5:ImageAwesome Icon="Regular_Copy" Foreground="{StaticResource SolidColorBrush.Text.1}" />
                 </Grid>
+                <Grid Height="20" Width="20" Margin="5,0,5,0" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                      ToolTip="{Binding Translation.PostToDiscord, FallbackValue=POST__TO__DISCORD__WEBHOOK}" MouseUp="PostDamageMeterToDiscord_MouseUp">
+                    <fa5:ImageAwesome Icon="Brands_Discord" Foreground="{StaticResource SolidColorBrush.Text.1}" />
+                </Grid>
                 <Grid Height="20" Width="20" Margin="5,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" 
                       MouseEnter="OpenDamageMeterInfoPopup_MouseEnter" MouseLeave="CloseDamageMeterInfoPopup_MouseLeave">
                     <fa5:ImageAwesome Icon="Solid_InfoCircle" Foreground="{StaticResource SolidColorBrush.Text.1}" />

@@ -333,5 +333,14 @@ namespace StatisticsAnalysisTool.Properties {
                 this["ItemSpriteToJournalFileName"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DefaultDiscordWebhookUrl {
+            get {
+                return ((string)(this["DefaultDiscordWebhookUrl"]));
+            }
+        }
     }
 }
