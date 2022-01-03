@@ -129,7 +129,7 @@ namespace StatisticsAnalysisTool.UserControls
                 DiscordWebhookClient = new DiscordWebhookClient(vm?.DiscordWebhookUrl);
                 var embed = new EmbedBuilder
                 {
-                    Title = $"AlbionOnline-StatisticsAnalysis | Sort By {vm?.DamageMeterSortSelection.DamageMeterSortType.ToString()}",
+                    Title = $"AlbionOnline-StatisticsAnalysis | Sort by {vm?.DamageMeterSortSelection.DamageMeterSortType.ToString()} | Posted by {vm?.TrackingUsername}",
                     Description = output,
                     Color = Color.Red
                 };
