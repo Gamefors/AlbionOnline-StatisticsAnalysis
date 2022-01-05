@@ -9,6 +9,7 @@ using StatisticsAnalysisTool.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using StatisticsAnalysisTool.Network.Operations.Requests;
+using System.Diagnostics;
 
 namespace StatisticsAnalysisTool.Network
 {
@@ -229,6 +230,8 @@ namespace StatisticsAnalysisTool.Network
                 return EventCodes.Unused;
             }
 
+           // Debug.Print($"EventCode = {value} {(EventCodes)Enum.ToObject(typeof(EventCodes), value)}");
+
             return (EventCodes)Enum.ToObject(typeof(EventCodes), value);
         }
 
@@ -238,6 +241,8 @@ namespace StatisticsAnalysisTool.Network
             {
                 return OperationCodes.Unused;
             }
+
+           // Debug.Print($"OperationCode = {value} {(OperationCodes)Enum.ToObject(typeof(OperationCodes), value)}");
 
             return (OperationCodes)Enum.ToObject(typeof(OperationCodes), value);
         }
@@ -397,6 +402,8 @@ namespace StatisticsAnalysisTool.Network
             var value = new MightFavorPointsEvent(parameters);
             await MightFavorPointsEventHandler.OnActionAsync(value);
         }
+
+     
 
         #endregion
 

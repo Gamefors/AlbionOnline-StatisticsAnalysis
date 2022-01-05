@@ -1,4 +1,5 @@
 using log4net;
+using Newtonsoft.Json;
 using StatisticsAnalysisTool.Common;
 using StatisticsAnalysisTool.Enumerations;
 using StatisticsAnalysisTool.Models;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -17,7 +19,22 @@ using System.Windows;
 
 namespace StatisticsAnalysisTool.Network.Manager
 {
-    public class CombatController
+    class DamageObject
+    {
+        public string Victim { get; set; }
+
+        public string Attacker { get; set; }
+
+        public int Damage { get; set; }
+
+        public string Spell { get; set; }
+
+        public string SpellOrigin { get; set; }
+
+        public string SpellType { get; set; }
+    }
+
+        public class CombatController
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
@@ -30,6 +47,7 @@ namespace StatisticsAnalysisTool.Network.Manager
         public CombatController(TrackingController trackingController, MainWindow mainWindow, MainWindowViewModel mainWindowViewModel)
         {
             _trackingController = trackingController;
+      
             _mainWindow = mainWindow;
             _mainWindowViewModel = mainWindowViewModel;
 
@@ -42,22 +60,79 @@ namespace StatisticsAnalysisTool.Network.Manager
 
         #region Damage Meter methods
 
-        public async Task AddDamageAsync(long objectId, long causerId, double healthChange, double newHealthValue)
+        enum causingSpellType : int
         {
-            if (!IsDamageMeterActive || objectId == causerId)
+            AutoAttack = -1,
+            VialCurseCharge = 1733,
+            VialCurseDot = 1736,
+            HauntingScreams = 1765,
+            GrudgeDot = 1744,
+            Bane = 89,
+            Unholy_Frenzy = 3805
+
+        }
+
+        public async Task AddDamageAsync(long objectId, long causerId, double healthChange, double newHealthValue, int causingSpellType, EffectOrigin effectOrigin, EffectType effectTpye)
+        {
+            if (!IsDamageMeterActive || objectId == causerId) return;
+
+            if (_trackingController.EntityController.LocalUserData == null) return;
+
+            var causerEntity = _trackingController?.EntityController?.GetEntity(causerId);
+            var receiverEntity = _trackingController?.EntityController?.GetEntity(objectId);
+            double receivedDamage = Math.Abs(healthChange);
+            if (causerEntity?.Value == null) return;
+
+
+            var filePath = @"C:\Users\gamef\Downloads\receivedDamage.json";
+            // Read existing json data
+            var jsonData = System.IO.File.ReadAllText(filePath);
+            // De-serialize to object or create new list
+            var damageList = JsonConvert.DeserializeObject<List<DamageObject>>(jsonData)
+                                  ?? new List<DamageObject>();
+
+
+            string causingSpellName = $"Unknown({causingSpellType})";
+            if (Enum.IsDefined(typeof(causingSpellType), causingSpellType))
             {
-                return;
+                causingSpellName = ((causingSpellType)causingSpellType).ToString();
             }
 
-            var gameObject = _trackingController?.EntityController?.GetEntity(causerId);
+            if (_trackingController.EntityController.LocalUserData.UserObjectId == objectId)
+            {
+                Debug.Print($"[CombatController] You took {receivedDamage} Damage from {causingSpellName} which was a {effectOrigin} caused by {causerEntity.Value.Value.Name}.");
+                
+                damageList.Add(new DamageObject()
+                {
+                    Victim = receiverEntity.Value.Value.Name,
+                    Attacker = causerEntity.Value.Value.Name,
+                    Damage = (int)receivedDamage,
+                    Spell = causingSpellName,
+                    SpellOrigin = effectOrigin.ToString(),
+                    SpellType = effectTpye.ToString(),
+                });
+                jsonData = JsonConvert.SerializeObject(damageList);
+                System.IO.File.WriteAllText(filePath, jsonData);
 
-            if (gameObject?.Value == null
-                || gameObject.Value.Value?.ObjectType != GameObjectType.Player
-                || !_trackingController.EntityController.IsUserInParty(gameObject.Value.Value.Name)
+            }
+
+            if (_trackingController.EntityController.LocalUserData.UserObjectId != objectId && _trackingController.EntityController.IsUserInParty(objectId))
+            {
+               
+                Debug.Print($"[CombatController] {receiverEntity.Value.Value.Name} took {receivedDamage} Damage from {causingSpellName} which was a {effectOrigin} caused by {causerEntity.Value.Value.Name}.");
+            }
+
+            //check if entity that caused the damage exists
+                if (causerEntity?.Value == null
+                || causerEntity.Value.Value?.ObjectType != GameObjectType.Player
+                || !_trackingController.EntityController.IsUserInParty(causerEntity.Value.Value.Name)
                 )
             {
                 return;
             }
+
+
+
 
             if (GetHealthChangeType(healthChange) == HealthChangeType.Damage)
             {
@@ -67,7 +142,7 @@ namespace StatisticsAnalysisTool.Network.Manager
                     return;
                 }
 
-                gameObject.Value.Value.Damage += damageChangeValue;
+                causerEntity.Value.Value.Damage += damageChangeValue;
             }
 
             if (GetHealthChangeType(healthChange) == HealthChangeType.Heal)
@@ -83,12 +158,12 @@ namespace StatisticsAnalysisTool.Network.Manager
                     return;
                 }
 
-                gameObject.Value.Value.Heal += (int)Math.Round(healChangeValue, MidpointRounding.AwayFromZero);
+                causerEntity.Value.Value.Heal += (int)Math.Round(healChangeValue, MidpointRounding.AwayFromZero);
             }
 
-            if (gameObject.Value.Value?.CombatStart == null)
+            if (causerEntity.Value.Value?.CombatStart == null)
             {
-                gameObject.Value.Value.CombatStart = DateTime.UtcNow;
+                causerEntity.Value.Value.CombatStart = DateTime.UtcNow;
             }
 
             if (IsUiUpdateAllowed())
@@ -389,7 +464,7 @@ namespace StatisticsAnalysisTool.Network.Manager
             for (var i = 0; i < runs; i++)
             {
                 var damage = _random.Next(-100, 100);
-                await AddDamageAsync(9999, entity.ObjectId ?? -1, damage, _random.Next(2000, 3000));
+               // await AddDamageAsync(9999, entity.ObjectId ?? -1, damage, _random.Next(2000, 3000));
                 //Debug.Print($"--- AddDamage - {entity.Name}: {damage}");
 
                 await Task.Delay(_random.Next(1, 1000));

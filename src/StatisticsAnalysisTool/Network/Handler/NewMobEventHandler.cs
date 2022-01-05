@@ -2,6 +2,9 @@
 using StatisticsAnalysisTool.Network.Manager;
 using StatisticsAnalysisTool.Network.Events;
 using System.Threading.Tasks;
+using System;
+using System.Collections;
+using System.Linq;
 
 namespace StatisticsAnalysisTool.Network.Handler
 {
@@ -14,12 +17,22 @@ namespace StatisticsAnalysisTool.Network.Handler
             _trackingController = trackingController;
         }
 
+        enum MobTypes
+        {
+            Revenant = 693
+        }
+
         public async Task OnActionAsync(NewMobEvent value)
         {
-            //if (value.ObjectId != null)
-            //{
-            //    TrackingController.EntityController.AddEntity((long) value.ObjectId, string.Empty, GameObjectType.Mob, (GameObjectSubType) value.Type);
-            //}
+            string mobName = $"Unknown({value.Type})";
+            if(Enum.IsDefined(typeof(MobTypes), (int)value.Type)){
+                mobName = ((MobTypes)(int)value.Type).ToString();
+            }
+
+            if (value.Guid != null && value.ObjectId != null)
+            {
+                _trackingController.EntityController.AddEntity((long)value.ObjectId, (Guid)value.Guid, null, mobName, GameObjectType.Mob, GameObjectSubType.Mob);
+            }
             await Task.CompletedTask;
         }
     }

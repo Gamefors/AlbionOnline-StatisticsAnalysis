@@ -1,7 +1,9 @@
 ﻿using StatisticsAnalysisTool.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
 
 namespace StatisticsAnalysisTool.Network.Events
 {
@@ -10,7 +12,7 @@ namespace StatisticsAnalysisTool.Network.Events
         public NewCharacterEvent(Dictionary<byte, object> parameters)
         {
             ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
-
+           // Debug.Print($"[NewCharacterEvent] {JsonSerializer.Serialize(parameters)}");
             try
             {
                 if (parameters.ContainsKey(0)) ObjectId = parameters[0].ObjectToLong();
