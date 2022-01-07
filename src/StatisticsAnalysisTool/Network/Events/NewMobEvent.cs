@@ -41,35 +41,27 @@ namespace StatisticsAnalysisTool.Network.Events
 
                 if (parameters.ContainsKey(20))
                 {
+                    string uniqueString = parameters[20].ToString();
                     byte[] inputString = new byte[16];
-                    inputString[0] = (byte)parameters[20].ToString()[0];
-                    inputString[1] = (byte)parameters[20].ToString()[1];
-                    inputString[2] = (byte)parameters[20].ToString()[2];
-                    inputString[3] = (byte)parameters[20].ToString()[3];
-                    inputString[4] = (byte)parameters[20].ToString()[4];
-                    inputString[5] = (byte)parameters[20].ToString()[5];
-                    inputString[6] = (byte)parameters[20].ToString()[6];
-                    inputString[7] = (byte)parameters[20].ToString()[7];
+                    for (int i = 0; i < 16; i++)
+                    {
+                        inputString[i] = (byte)uniqueString[i % uniqueString.Length];
 
-                    inputString[8] = (byte)parameters[20].ToString()[0];
-                    inputString[9] = (byte)parameters[20].ToString()[1];
-                    inputString[10] = (byte)parameters[20].ToString()[2];
-                    inputString[11] = (byte)parameters[20].ToString()[3];
-                    inputString[12] = (byte)parameters[20].ToString()[4];
-                    inputString[13] = (byte)parameters[20].ToString()[5];
-                    inputString[14] = (byte)parameters[20].ToString()[6];
-                    inputString[15] = (byte)parameters[20].ToString()[7];
-
+                    }
                     Guid = inputString.ObjectToGuid();
                 }
-                    
-
-                Debug.Print($"[NewMob] ObjectId: {ObjectId} Guid: {Guid} Type: {Type} MoveSpeed: {MoveSpeed} HitPoints: {HitPoints} HitPointsMax: {HitPointsMax} Energy: {Energy} EnergyMax: {EnergyMax} EnergyRegenration: {EnergyRegeneration}");
-
+                //Debug.Print($"[NewMob] ObjectId: {ObjectId} Guid: {Guid} Type: {Type}");
             }
-
             catch (Exception e)
             {
+                if (parameters.ContainsKey(0))
+                {
+                    Debug.Print($"[NewMobEvent] Id: {parameters[0].ObjectToLong()} | Mob could not be added.");
+                }
+                else
+                {
+                    Debug.Print($"[NewMobEvent] Mob id could not be added.");
+                }
                 ConsoleManager.WriteLineForError(MethodBase.GetCurrentMethod()?.DeclaringType, e);
             }
         }

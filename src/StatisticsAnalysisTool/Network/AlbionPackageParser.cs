@@ -229,9 +229,8 @@ namespace StatisticsAnalysisTool.Network
             {
                 return EventCodes.Unused;
             }
-
-           // Debug.Print($"EventCode = {value} {(EventCodes)Enum.ToObject(typeof(EventCodes), value)}");
-
+            EventCodes currentEventCode = (EventCodes)Enum.ToObject(typeof(EventCodes), value);
+            //Debug.Print($"EventCode = {currentEventCode}({value})");
             return (EventCodes)Enum.ToObject(typeof(EventCodes), value);
         }
 
@@ -241,8 +240,8 @@ namespace StatisticsAnalysisTool.Network
             {
                 return OperationCodes.Unused;
             }
-
-           // Debug.Print($"OperationCode = {value} {(OperationCodes)Enum.ToObject(typeof(OperationCodes), value)}");
+            OperationCodes currentOperationsCode = (OperationCodes)Enum.ToObject(typeof(OperationCodes), value);
+            //Debug.Print($"OperationCode = {currentOperationsCode}({value})");
 
             return (OperationCodes)Enum.ToObject(typeof(OperationCodes), value);
         }
