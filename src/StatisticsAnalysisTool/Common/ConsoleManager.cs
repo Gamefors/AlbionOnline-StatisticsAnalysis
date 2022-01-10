@@ -1,7 +1,9 @@
 ﻿using Pastel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.Json;
@@ -67,21 +69,21 @@ namespace StatisticsAnalysisTool.Common
         private static void InvalidateOutAndError()
         {
             // TODO: Refactoring
-            //var type = typeof(Console);
+            var type = typeof(Console);
 
-            //var _out = type.GetField("_out", BindingFlags.Static | BindingFlags.NonPublic);
-            //var _error = type.GetField("_error", BindingFlags.Static | BindingFlags.NonPublic);
-            //var _InitializeStdOutError = type.GetMethod("InitializeStdOutError", BindingFlags.Static | BindingFlags.NonPublic);
+            var _out = type.GetField("s_out", BindingFlags.Static | BindingFlags.NonPublic);
+            var _error = type.GetField("s_error", BindingFlags.Static | BindingFlags.NonPublic);
+            var _InitializeStdOutError = type.GetMethod("InitializeStdOutError", BindingFlags.Static | BindingFlags.NonPublic);
 
-            //Debug.Assert(_out != null);
-            //Debug.Assert(_error != null);
+            Debug.Assert(_out != null);
+            Debug.Assert(_error != null);
 
-            //Debug.Assert(_InitializeStdOutError != null);
+          //  Debug.Assert(_InitializeStdOutError != null);
 
-            //_out.SetValue(null, null);
-            //_error.SetValue(null, null);
+            _out.SetValue(null, null);
+            _error.SetValue(null, null);
 
-            //_InitializeStdOutError.Invoke(null, new object[] { true });
+          //  _InitializeStdOutError.Invoke(null, new object[] { true });
         }
 
         private static void SetOutAndErrorNull()
@@ -95,6 +97,18 @@ namespace StatisticsAnalysisTool.Common
         public const string EventColor = "#248A84";
         public const string EventMapChangeColor = "#0279be";
         public const string NormalColor = "#ffffff";
+
+        public static void WriteLineForCombatController(Models.DamageObject damageObject)
+        {
+            if (HasConsole)
+            {
+                string attackerString = damageObject.Attacker.Pastel(WarnColor);
+                if (attackerString.ToLower().Contains("unknown")) attackerString = damageObject.Attacker.Pastel(ErrorColor);
+                string spellString = damageObject.Spell.Name.Pastel("#686de0");
+                if (spellString.ToLower().Contains("unknown")) spellString = damageObject.Spell.Name.Pastel(ErrorColor);
+                Console.WriteLine($@"[{DateTime.UtcNow}]".Pastel("#0279be") + " " + "[CombatController]".Pastel("#9b59b6") + " " + $"Attacker: {attackerString} Spell: {spellString}{$"({damageObject.Spell.Origin})".Pastel("#30336b")} DMG: {damageObject.Damage.ToString().Pastel(ErrorColor)} Victim: {damageObject.Victim} ");
+            }
+        }
 
         public static void WriteLineForNetworkHandler(string name, Dictionary<byte, object> parameters)
         {

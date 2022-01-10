@@ -11,7 +11,7 @@ namespace StatisticsAnalysisTool.Network.Handler
 
         public PartyChangedOrderEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+          //  ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

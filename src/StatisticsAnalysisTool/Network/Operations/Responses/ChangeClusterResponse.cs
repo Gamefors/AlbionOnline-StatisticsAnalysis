@@ -18,7 +18,7 @@ namespace StatisticsAnalysisTool.Network.Operations.Responses
 
         public ChangeClusterResponse(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+           // ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

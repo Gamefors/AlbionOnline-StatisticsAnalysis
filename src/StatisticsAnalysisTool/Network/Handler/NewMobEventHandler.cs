@@ -6,7 +6,7 @@ using System;
 
 namespace StatisticsAnalysisTool.Network.Handler
 {
-    enum MobTypes
+    enum MobTypes : int
     {
         Revenant = 693,
         Frost_Weaver = 707,
@@ -61,15 +61,27 @@ namespace StatisticsAnalysisTool.Network.Handler
         Rock_Elemental = 2322,
         Morgana_Crossbowman_Group_Dungeon = 2789,
         Forgotten_General_Boss_Group_Dungeon = 2282,
-        Morgana_Marksman_Boss_Group_Dungeon = 2794
-
-
-
-
-
-
-
-
+        Morgana_Marksman_Boss_Group_Dungeon = 2794,
+        Morgana_Knight_Solo_Dungeon = 2709,
+        Earthkeeper_Wildling_Group_Dungeon = 2485,
+        Earthkeeper_Knifeling_Group_Dungeon = 2475,
+        Earthkeeper_Axe_Thrower_Group_Dungeon = 2528,
+        Earthkeeper_Druid_Group_Dungeon = 2538,
+        Keeper_Bear_Group_Dungeon = 2498,
+        Earthkeeper_Earthchild = 2503,
+        Earthkeeper_Beserker = 2518,
+        Will_o_Wisp_Group_Dungeon = 2465,
+        Rock_Elemental_Group_Dungeon = 2460,
+        Keeper_Bolt_Arreseter_Group_Dungeon = 1712,
+        Earthkeeper_Sharpeye_Group_Dungeon = 2475,
+        Earthkeeper_Greybeard_Boss_Group_Dungeon = 2558,
+        Earthkeeper_Axe_Maiden_Boss_Group_Dungeon = 2533,
+        Raging_Wisp_Group_Dungeon = 2470,
+        Earthkeeper_Sage_Group_Dungeon = 2543,
+        Earthkeeper_Patriach_Group_Dungeon = 2523,
+        Earthkeeper_Giant_Group_Dungeon = 2553,
+        Athos_Boss_Group_Dungeon = 2573,
+        Keeper_Living_Roots_Group_Dungeon = 2312,
 
     }
     public class NewMobEventHandler

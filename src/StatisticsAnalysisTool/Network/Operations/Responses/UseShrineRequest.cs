@@ -12,7 +12,7 @@ namespace StatisticsAnalysisTool.Network.Operations.Requests
 
         public UseShrineRequest(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+            //ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

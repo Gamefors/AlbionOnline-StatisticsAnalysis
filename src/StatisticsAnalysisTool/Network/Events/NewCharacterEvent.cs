@@ -11,7 +11,7 @@ namespace StatisticsAnalysisTool.Network.Events
     {
         public NewCharacterEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+          //  ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
            // Debug.Print($"[NewCharacterEvent] {JsonSerializer.Serialize(parameters)}");
             try
             {

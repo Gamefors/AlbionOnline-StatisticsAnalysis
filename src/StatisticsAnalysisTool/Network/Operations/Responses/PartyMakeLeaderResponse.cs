@@ -14,7 +14,7 @@ namespace StatisticsAnalysisTool.Network.Operations.Responses
 
         public PartyMakeLeaderResponse(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+          //  ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

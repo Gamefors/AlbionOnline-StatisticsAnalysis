@@ -17,8 +17,8 @@ namespace StatisticsAnalysisTool.Network.Operations.Responses
         //private readonly int _itemId;
 
         public UseLootChestResponse(Dictionary<byte, object> parameters)
-        {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+        {//
+         //   ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

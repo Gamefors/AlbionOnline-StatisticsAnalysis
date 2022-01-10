@@ -20,7 +20,7 @@ namespace StatisticsAnalysisTool.Network.Events
 
         public GrabbedLootEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+           // ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

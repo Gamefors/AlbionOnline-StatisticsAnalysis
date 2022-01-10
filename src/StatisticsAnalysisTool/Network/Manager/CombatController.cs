@@ -103,23 +103,30 @@ namespace StatisticsAnalysisTool.Network.Manager
         Mob_Groundwrecker  = 4352,
         Mob_Charge = 4544,
         Mob_Heavy_Smash = 4456,
-        Mob_Rockslide = 5351
+        Mob_Rockslide = 5351,
+        Morgana_Knight_Mob_Crush = 3769,
+        Mob_Eearthkeeper_Static_Discharge = 4365,
+        Mob_Rotten_Ground = 4367,
+        Mob_Smash = 4335,
+        Mob_Geyser = 4328,
+        Mob_Punch = 4423,
+        Mob_War_Stomp = 4419,
+        Mob_Boulder = 4440,
+        Mob_Ground_Breaker = 4584,
+        Mob_Giant_Rocks = 4441,
+        Mob_Strong_Kick = 4438,
+        Mob_Impact = 4439,
+
+
+
+
+
+
+
 
     }
     
-    class Spell
-    {
-        public string Name { get; set; }
-        public string Origin { get; set; }
-        public string Type { get; set; }
-    }
-    class DamageObject
-    {
-        public string Victim { get; set; }
-        public string Attacker { get; set; }
-        public int Damage { get; set; }
-        public Spell Spell { get; set; }
-    }
+ 
     class ReceivedDamageObject
     {
         public LocalUserData PlayerData { get; set; }
@@ -163,6 +170,7 @@ namespace StatisticsAnalysisTool.Network.Manager
             var attackerEntity = _trackingController?.EntityController?.GetEntity(causerId);
             if (attackerEntity?.Value == null)
             {
+                ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"[CombatController] Id: {causerId} | Entity not found.", "#FF0000");
                 Debug.Print($"[CombatController] Id: {causerId} | Entity not found.");
                 return;
             }
@@ -192,41 +200,44 @@ namespace StatisticsAnalysisTool.Network.Manager
 
             if (_trackingController.EntityController.LocalUserData.UserObjectId == objectId && healthChange < 0)
             {
-                Debug.Print($"[CombatController] Attacker: {attackerEntity.Value.Value.Name} Spell: {causingSpellName}({effectOrigin}) DMG:{receivedDamage}");
-
-                Spell spell = new Spell();
-                spell.Name = causingSpellName;
-                spell.Type = effectTpye.ToString();
-                spell.Origin = effectOrigin.ToString();
-
-                receivedDamageObject.PlayerDamage.Add(new DamageObject()
+                Spell spell = new Spell()
+                {
+                    Name = causingSpellName,
+                    Type = effectTpye.ToString(),
+                    Origin = effectOrigin.ToString()
+                };
+                DamageObject damageObject = new DamageObject()
                 {
                     Victim = victimEntity.Value.Value.Name,
                     Attacker = attackerEntity.Value.Value.Name,
                     Damage = (int)receivedDamage,
                     Spell = spell
-                });
+                };
 
+
+                receivedDamageObject.PlayerDamage.Add(damageObject);
+                Debug.Print($"[CombatController] Attacker: {damageObject.Attacker} Spell: {damageObject.Spell.Name}({damageObject.Spell.Origin}) DMG:{damageObject.Damage} Victim: {damageObject.Victim}");
+                ConsoleManager.WriteLineForCombatController(damageObject);
             }
 
             if (_trackingController.EntityController.LocalUserData.UserObjectId != objectId && _trackingController.EntityController.IsUserInParty(objectId) && healthChange < 0)
             {
-
-                Debug.Print($"[CombatController] Partymember:{victimEntity.Value.Value.Name} Attacker: {attackerEntity.Value.Value.Name} Spell: {causingSpellName}({effectOrigin}) DMG:{receivedDamage}");
-
-                Spell spell = new Spell();
-                spell.Name = causingSpellName;
-                spell.Type = effectTpye.ToString();
-                spell.Origin = effectOrigin.ToString();
-
-                receivedDamageObject.PartyDamage.Add(new DamageObject()
+                Spell spell = new Spell()
+                {
+                    Name = causingSpellName,
+                    Type = effectTpye.ToString(),
+                    Origin = effectOrigin.ToString()
+                };
+                DamageObject damageObject = new DamageObject()
                 {
                     Victim = victimEntity.Value.Value.Name,
                     Attacker = attackerEntity.Value.Value.Name,
                     Damage = (int)receivedDamage,
                     Spell = spell
-                });
-                
+                };
+                receivedDamageObject.PlayerDamage.Add(damageObject);
+                Debug.Print($"[CombatController] Attacker: {damageObject.Attacker} Spell: {damageObject.Spell.Name}({damageObject.Spell.Origin}) DMG:{damageObject.Damage} Victim: {damageObject.Victim}");
+                ConsoleManager.WriteLineForCombatController(damageObject);
             }
 
             jsonData = JsonConvert.SerializeObject(receivedDamageObject);

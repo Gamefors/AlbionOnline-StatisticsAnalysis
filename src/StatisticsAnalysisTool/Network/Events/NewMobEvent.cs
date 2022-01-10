@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Text.Json;
 
 namespace StatisticsAnalysisTool.Network.Events
 {
@@ -11,7 +10,7 @@ namespace StatisticsAnalysisTool.Network.Events
     {
         public NewMobEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+           // ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
             //Debug.Print($"[NewMobEvent] {JsonSerializer.Serialize(parameters)}");
             try
             {

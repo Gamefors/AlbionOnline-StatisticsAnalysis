@@ -16,7 +16,7 @@ namespace StatisticsAnalysisTool.Network.Events
 
         public NewSimpleItemEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+          //  ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

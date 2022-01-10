@@ -9,7 +9,7 @@ namespace StatisticsAnalysisTool.Network.Events
     {
         public LeaveEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+           // ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
 
             try
             {

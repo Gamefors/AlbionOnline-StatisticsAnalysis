@@ -19,21 +19,21 @@ namespace StatisticsAnalysisTool.Network.Operations.Responses
             try
             {
                 //Debug.Print("---------- UserInformation (Response) ----------");
-                ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, "---------- UserInformation (Response) ----------", ConsoleManager.EventMapChangeColor);
+                //ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, "---------- UserInformation (Response) ----------", ConsoleManager.EventMapChangeColor);
 
                 UserObjectId = null;
                 if (parameters.ContainsKey(0))
                 {
                     UserObjectId = parameters[0].ObjectToLong();
                    // Debug.Print($"Local user ObjectId: {UserObjectId}");
-                    ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local user ObjectId: {UserObjectId}", ConsoleManager.EventMapChangeColor);
+                   // ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local user ObjectId: {UserObjectId}", ConsoleManager.EventMapChangeColor);
                 }
 
                 if (parameters.ContainsKey(1))
                 {
                     Guid = parameters[1].ObjectToGuid();
                    // Debug.Print($"Local user Guid: {Guid}");
-                    ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local user Guid: {Guid}", ConsoleManager.EventMapChangeColor);
+                   // ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local user Guid: {Guid}", ConsoleManager.EventMapChangeColor);
                 }
 
                 if (parameters.ContainsKey(2))
@@ -68,7 +68,7 @@ namespace StatisticsAnalysisTool.Network.Operations.Responses
                 if (parameters.ContainsKey(47))
                 {
                     InteractGuid = parameters[47].ObjectToGuid();
-                    ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local interact object Guid: {InteractGuid}", ConsoleManager.EventMapChangeColor);
+                    //ConsoleManager.WriteLineForMessage(MethodBase.GetCurrentMethod()?.DeclaringType, $"Local interact object Guid: {InteractGuid}", ConsoleManager.EventMapChangeColor);
                 }
 
                 if (parameters.ContainsKey(51))

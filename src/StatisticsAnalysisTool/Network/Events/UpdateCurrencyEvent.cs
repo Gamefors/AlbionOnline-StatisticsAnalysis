@@ -18,7 +18,7 @@ namespace StatisticsAnalysisTool.Network.Handler
 
         public UpdateCurrencyEvent(Dictionary<byte, object> parameters)
         {
-            ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
+           // ConsoleManager.WriteLineForNetworkHandler(GetType().Name, parameters);
             
             try
             {
