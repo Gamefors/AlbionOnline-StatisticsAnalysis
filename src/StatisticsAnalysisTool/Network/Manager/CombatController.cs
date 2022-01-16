@@ -116,6 +116,10 @@ namespace StatisticsAnalysisTool.Network.Manager
         Mob_Giant_Rocks = 4441,
         Mob_Strong_Kick = 4438,
         Mob_Impact = 4439,
+        Mob_Demonic_Field = 3759,
+        Morgana_Mob_Punch = 4626,
+        Mob_Suppression_Fire = 3739,
+        Mob_Disengage = 3744,
 
 
 
@@ -235,7 +239,7 @@ namespace StatisticsAnalysisTool.Network.Manager
                     Damage = (int)receivedDamage,
                     Spell = spell
                 };
-                receivedDamageObject.PlayerDamage.Add(damageObject);
+                receivedDamageObject.PartyDamage.Add(damageObject);
                 Debug.Print($"[CombatController] Attacker: {damageObject.Attacker} Spell: {damageObject.Spell.Name}({damageObject.Spell.Origin}) DMG:{damageObject.Damage} Victim: {damageObject.Victim}");
                 ConsoleManager.WriteLineForCombatController(damageObject);
             }

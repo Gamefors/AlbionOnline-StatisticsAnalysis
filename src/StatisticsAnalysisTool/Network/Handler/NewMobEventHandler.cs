@@ -82,6 +82,13 @@ namespace StatisticsAnalysisTool.Network.Handler
         Earthkeeper_Giant_Group_Dungeon = 2553,
         Athos_Boss_Group_Dungeon = 2573,
         Keeper_Living_Roots_Group_Dungeon = 2312,
+        Morgana_Conjurer_Group_Dungeon = 2824,
+        Morgana_Squire_Group_Dungeon = 2759,
+        Morgana_Acolyte_Group_Dungeon = 2749,
+        Giant_Raven_Group_Dungeon = 2769,
+        Morgana_Infestor_Group_Dungeon = 2829,
+        Morgana_Animated_Tome_Group_Dungeon = 2739,
+        Morgana_Footman_Group_Dungeon = 2779,
 
     }
     public class NewMobEventHandler
