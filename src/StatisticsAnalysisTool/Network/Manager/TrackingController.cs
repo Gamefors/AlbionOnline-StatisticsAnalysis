@@ -9,17 +9,19 @@ using StatisticsAnalysisTool.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using StatisticsAnalysisTool.Common.UserSettings;
 
 namespace StatisticsAnalysisTool.Network.Manager
 {
     public class TrackingController : ITrackingController
     {
-        private const int _maxNotifications = 4000;
-        private const int _maxEnteredCluster = 500;
+        private const int MaxNotifications = 4000;
+        private const int MaxEnteredCluster = 500;
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         private readonly MainWindow _mainWindow;
@@ -37,12 +39,12 @@ namespace StatisticsAnalysisTool.Network.Manager
         {
             _mainWindowViewModel = mainWindowViewModel;
             _mainWindow = mainWindow;
-            EntityController = new EntityController(mainWindowViewModel);
+            EntityController = new EntityController(this, mainWindowViewModel);
             DungeonController = new DungeonController(this, mainWindowViewModel);
             CombatController = new CombatController(this, _mainWindow, mainWindowViewModel);
-            LootController = new LootController(this);
+            LootController = new LootController(this, mainWindowViewModel);
             StatisticController = new StatisticController(this, mainWindowViewModel);
-            CountUpTimer = new CountUpTimer(mainWindowViewModel);
+            CountUpTimer = new CountUpTimer(this, mainWindowViewModel);
         }
 
         public ClusterInfo CurrentCluster { get; private set; }
@@ -117,7 +119,7 @@ namespace StatisticsAnalysisTool.Network.Manager
         {
             foreach (var cluster in _mainWindowViewModel.EnteredCluster.OrderBy(x => x.Entered))
             {
-                if (_mainWindowViewModel.EnteredCluster?.Count <= _maxEnteredCluster)
+                if (_mainWindowViewModel.EnteredCluster?.Count <= MaxEnteredCluster)
                 {
                     break;
                 }
@@ -147,7 +149,13 @@ namespace StatisticsAnalysisTool.Network.Manager
 
         public async Task AddNotificationAsync(TrackingNotification item)
         {
-            await item.SetTypeAsync();
+            item.SetType();
+
+            if (!IsTrackingAllowedByMainCharacter() && item.Type == NotificationType.Fame || !IsTrackingAllowedByMainCharacter() && item.Type == NotificationType.Silver 
+                || !IsTrackingAllowedByMainCharacter() && item.Type == NotificationType.Faction)
+            {
+                return;
+            }
 
             if (_mainWindowViewModel?.TrackingNotifications == null)
             {
@@ -189,7 +197,7 @@ namespace StatisticsAnalysisTool.Network.Manager
 
             _isRemovesUnnecessaryNotificationsActive = true;
 
-            var numberToBeRemoved = _mainWindowViewModel.TrackingNotifications.Count - _maxNotifications;
+            var numberToBeRemoved = _mainWindowViewModel.TrackingNotifications.Count - MaxNotifications;
             if (numberToBeRemoved > 0)
             {
                 await foreach (var notification in _mainWindowViewModel.TrackingNotifications.OrderBy(x => x.DateTime).ToList().Take(numberToBeRemoved).ToAsyncEnumerable())
@@ -211,49 +219,54 @@ namespace StatisticsAnalysisTool.Network.Manager
                 _mainWindowViewModel.TrackingNotifications.Clear();
             });
         }
-        
-        [SuppressMessage("ReSharper", "ConstantConditionalAccessQualifier")]
+
         public async Task NotificationUiFilteringAsync(string text = null)
         {
             try
             {
-
                 if (!string.IsNullOrEmpty(text))
                 {
-                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable()?.ForEachAsync(d =>
+                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable().ForEachAsync(d =>
                     {
                         d.Visibility = Visibility.Collapsed;
-                    });
+                    })!;
 
-                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable()?.Where(x =>
+                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable().Where(x =>
                         (_notificationTypesFilters?.Contains(x.Type) ?? true)
-                        && 
+                        &&
                         (
-                            ((OtherGrabbedLootNotificationFragment)x.Fragment).Looter.ToLower().Contains(text.ToLower())
-                            || ((OtherGrabbedLootNotificationFragment)x.Fragment).LocalizedName.ToLower().Contains(text.ToLower())
-                            || ((OtherGrabbedLootNotificationFragment)x.Fragment).LootedPlayer.ToLower().Contains(text.ToLower())
+                            x.Fragment is OtherGrabbedLootNotificationFragment fragment &&
+                            (fragment.Looter.ToLower().Contains(text.ToLower())
+                             || fragment.LocalizedName.ToLower().Contains(text.ToLower())
+                             || fragment.LootedPlayer.ToLower().Contains(text.ToLower())
+                            )
+                            ||
+                            x.Fragment is KillNotificationFragment killFragment &&
+                            (killFragment.Died.ToLower().Contains(text.ToLower())
+                             || killFragment.KilledBy.ToLower().Contains(text.ToLower())
+                            )
                         )
-                        && (IsLootFromMobShown || !((OtherGrabbedLootNotificationFragment)x.Fragment).IsLootedPlayerMob)
+                        && (IsLootFromMobShown || x.Fragment is OtherGrabbedLootNotificationFragment { IsLootedPlayerMob: false } or not OtherGrabbedLootNotificationFragment)
                     ).ForEachAsync(d =>
                     {
                         d.Visibility = Visibility.Visible;
-                    });
+                    })!;
                 }
                 else
                 {
-                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable()?.ForEachAsync(d =>
+                    await _mainWindowViewModel?.TrackingNotifications?.ToAsyncEnumerable().ForEachAsync(d =>
                     {
                         d.Visibility = Visibility.Collapsed;
-                    });
+                    })!;
 
-                    await _mainWindowViewModel?.TrackingNotifications?.Where(x => 
+                    await _mainWindowViewModel?.TrackingNotifications?.Where(x =>
                         (_notificationTypesFilters?.Contains(x.Type) ?? false)
-                        && (IsLootFromMobShown || !((OtherGrabbedLootNotificationFragment)x.Fragment).IsLootedPlayerMob))?.ToAsyncEnumerable().ForEachAsync(d =>
+                        && (IsLootFromMobShown || x.Fragment is OtherGrabbedLootNotificationFragment { IsLootedPlayerMob: false } or not OtherGrabbedLootNotificationFragment)
+                    ).ToAsyncEnumerable().ForEachAsync(d =>
                     {
                         d.Visibility = Visibility.Visible;
-                    });
+                    })!;
                 }
-
             }
             catch (Exception)
             {
@@ -295,7 +308,7 @@ namespace StatisticsAnalysisTool.Network.Manager
             {
                 await foreach (var notification in _mainWindowViewModel.TrackingNotifications.ToAsyncEnumerable())
                 {
-                    await notification.SetTypeAsync();
+                    notification.SetType();
                 }
             });
         }
@@ -316,6 +329,42 @@ namespace StatisticsAnalysisTool.Network.Manager
             return false;
         }
 
+        #endregion
+
+        #region Main tracking character name
+
+        public void SetMainCharacterNameForTracking(string currentUsername)
+        {
+            if (SettingsController.CurrentSettings.MainTrackingCharacterName != null)
+            {
+                return;
+            }
+
+            SettingsController.CurrentSettings.MainTrackingCharacterName = currentUsername;
+        }
+
+        public bool IsTrackingAllowedByMainCharacter()
+        {
+            var localEntity = EntityController.GetLocalEntity();
+
+            if (localEntity?.Value?.Name == null || string.IsNullOrEmpty(SettingsController.CurrentSettings.MainTrackingCharacterName))
+            {
+                return true;
+            }
+
+            if (localEntity.Value.Value.Name == SettingsController.CurrentSettings.MainTrackingCharacterName)
+            {
+                return true;
+            }
+
+            if (localEntity.Value.Value.Name != SettingsController.CurrentSettings.MainTrackingCharacterName)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
         #endregion
     }
 }

@@ -1,16 +1,11 @@
 ﻿using log4net;
 using StatisticsAnalysisTool.Enumerations;
 using StatisticsAnalysisTool.Models;
-using StatisticsAnalysisTool.Properties;
+using StatisticsAnalysisTool.Models.ItemsJsonModel;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace StatisticsAnalysisTool.Common
 {
@@ -18,31 +13,99 @@ namespace StatisticsAnalysisTool.Common
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private static IAsyncEnumerable<SimpleItemData> _simpleItemData = new List<SimpleItemData>().ToAsyncEnumerable();
-        private static IAsyncEnumerable<ItemSpriteToJournalStruct> _craftingJournalData = new List<ItemSpriteToJournalStruct>().ToAsyncEnumerable();
-
-        public static double GetRequiredJournalAmount(Item item, double itemQuantityToBeCrafted)
+        public static int GetTotalAmountResources(List<CraftingRequirements> craftingRequirements)
         {
-            if (itemQuantityToBeCrafted == 0)
+            var craftingRequirement = craftingRequirements.FirstOrDefault();
+            if (craftingRequirement == null)
             {
                 return 0;
             }
 
-            var totalBaseFame = GetTotalBaseFame(item.FullItemInformation.CraftingRequirements.TotalAmountResources, (ItemTier)item.Tier, (ItemLevel)item.Level);
+            return craftingRequirement.CraftResource
+                .Where(x => x.UniqueName.ToUpper().Contains("PLANKS") && !x.UniqueName.ToUpper().Contains("_ARTEFACT_") && !x.UniqueName.ToUpper().Contains("_FAVOR_")
+                            || x.UniqueName.ToUpper().Contains("METALBAR") && !x.UniqueName.ToUpper().Contains("_ARTEFACT_") && !x.UniqueName.ToUpper().Contains("_FAVOR_")
+                            || x.UniqueName.ToUpper().Contains("METALBAR") && !x.UniqueName.ToUpper().Contains("_ARTEFACT_") && !x.UniqueName.ToUpper().Contains("_FAVOR_")
+                            || x.UniqueName.ToUpper().Contains("LEATHER") && !x.UniqueName.ToUpper().Contains("_ARTEFACT_") && !x.UniqueName.ToUpper().Contains("_FAVOR_")
+                            || x.UniqueName.ToUpper().Contains("CLOTH") && !x.UniqueName.ToUpper().Contains("_ARTEFACT_") && !x.UniqueName.ToUpper().Contains("_FAVOR_"))
+                .Sum(craftResource => craftResource.Count);
+        }
+
+        public static double GetRequiredJournalAmount(Item item, double itemQuantityToBeCrafted)
+        {
+            if (itemQuantityToBeCrafted == 0 || item == null)
+            {
+                return 0;
+            }
+
+            var resources = item.FullItemInformation switch
+            {
+                Weapon weapon => GetTotalAmountResources(weapon.CraftingRequirements),
+                EquipmentItem equipmentItem => GetTotalAmountResources(equipmentItem.CraftingRequirements),
+                _ => 0
+            };
+
+            var totalBaseFame = GetTotalBaseFame(resources, (ItemTier)item.Tier, (ItemLevel)item.Level);
             var totalJournalFame = totalBaseFame * itemQuantityToBeCrafted;
             return totalJournalFame / MaxJournalFame((ItemTier)item.Tier);
         }
-        
-        public static async Task<Item> GetCraftingJournalItemAsync(int tier, string itemSpriteName)
+
+        public static Item GetCraftingJournalItem(int tier, CraftingJournalType craftingJournalType)
         {
-            var data = await _craftingJournalData.FirstOrDefaultAsync(x => x.Name == itemSpriteName).ConfigureAwait(false);
-            return data.Id switch
+            return craftingJournalType switch
             {
                 CraftingJournalType.JournalMage => ItemController.GetItemByUniqueName($"T{tier}_JOURNAL_MAGE_EMPTY"),
                 CraftingJournalType.JournalHunter => ItemController.GetItemByUniqueName($"T{tier}_JOURNAL_HUNTER_EMPTY"),
                 CraftingJournalType.JournalWarrior => ItemController.GetItemByUniqueName($"T{tier}_JOURNAL_WARRIOR_EMPTY"),
                 CraftingJournalType.JournalToolMaker => ItemController.GetItemByUniqueName($"T{tier}_JOURNAL_TOOLMAKER_EMPTY"),
                 _ => null
+            };
+        }
+
+        public static CraftingJournalType GetCraftingJournalType(string uniqueName, string craftingCategory)
+        {
+            if (craftingCategory is "offhand" or null)
+            {
+                if (uniqueName.Contains("OFF_SCHIELD")
+                    || uniqueName.Contains("OFF_TOWERSHIELD")
+                    || uniqueName.Contains("OFF_SPIKEDSHIELD")
+                    || uniqueName.Contains("OFF_TOWERSHIELD"))
+                {
+                    return CraftingJournalType.JournalWarrior;
+                }
+
+                if (uniqueName.Contains("OFF_JESTERCANE")
+                    || uniqueName.Contains("OFF_TORCH")
+                    || uniqueName.Contains("OFF_LAMP")
+                    || uniqueName.Contains("OFF_TALISMAN")
+                    || uniqueName.Contains("OFF_HORN"))
+                {
+                    return CraftingJournalType.JournalHunter;
+                }
+
+                if (uniqueName.Contains("OFF_CENSER")
+                    || uniqueName.Contains("OFF_TOTEM")
+                    || uniqueName.Contains("OFF_DEMONSKULL")
+                    || uniqueName.Contains("OFF_ORB")
+                    || uniqueName.Contains("OFF_BOOK"))
+                {
+                    return CraftingJournalType.JournalMage;
+                }
+
+                if (uniqueName.Contains("_CAPE")
+                    || uniqueName.Contains("_BAG")
+                    || uniqueName.Contains("_BAG_INSIGHT"))
+                {
+                    return CraftingJournalType.JournalToolMaker;
+                }
+            }
+
+            return craftingCategory switch
+            {
+                "tools" or "gatherergear" => CraftingJournalType.JournalToolMaker,
+                "cloth_helmet" or "cloth_armor" or "cloth_shoes" or "cursestaff" or "firestaff" or "froststaff" or "arcanestaff" or "holystaff" => CraftingJournalType.JournalMage,
+                "plate_helmet" or "plate_armor" or "plate_shoes" or "crossbow" or "axe" or "sword" or "hammer" or "mace" or "knuckles" => CraftingJournalType.JournalWarrior,
+                "leather_helmet" or "leather_armor" or "leather_shoes" or "bow" or "naturestaff" or "dagger" or "spear" or "quarterstaff" => CraftingJournalType.JournalHunter,
+                _ => CraftingJournalType.Unknown
             };
         }
 
@@ -68,25 +131,25 @@ namespace StatisticsAnalysisTool.Common
                 (ItemTier.T2, ItemLevel.Level0) => numberOfMaterials * 1.5,
                 (ItemTier.T3, ItemLevel.Level0) => numberOfMaterials * 7.5,
                 (ItemTier.T4, ItemLevel.Level0) => numberOfMaterials * 22.5,
-                (ItemTier.T4, ItemLevel.Level1) => numberOfMaterials * 37.5,
-                (ItemTier.T4, ItemLevel.Level2) => numberOfMaterials * 52.5,
-                (ItemTier.T4, ItemLevel.Level3) => numberOfMaterials * 67.5,
+                (ItemTier.T4, ItemLevel.Level1) => numberOfMaterials * 45,
+                (ItemTier.T4, ItemLevel.Level2) => numberOfMaterials * 90,
+                (ItemTier.T4, ItemLevel.Level3) => numberOfMaterials * 180,
                 (ItemTier.T5, ItemLevel.Level0) => numberOfMaterials * 90,
-                (ItemTier.T5, ItemLevel.Level1) => numberOfMaterials * 172.5,
-                (ItemTier.T5, ItemLevel.Level2) => numberOfMaterials * 255,
-                (ItemTier.T5, ItemLevel.Level3) => numberOfMaterials * 337.5,
+                (ItemTier.T5, ItemLevel.Level1) => numberOfMaterials * 180,
+                (ItemTier.T5, ItemLevel.Level2) => numberOfMaterials * 360,
+                (ItemTier.T5, ItemLevel.Level3) => numberOfMaterials * 720,
                 (ItemTier.T6, ItemLevel.Level0) => numberOfMaterials * 270,
-                (ItemTier.T6, ItemLevel.Level1) => numberOfMaterials * 532.5,
-                (ItemTier.T6, ItemLevel.Level2) => numberOfMaterials * 795,
-                (ItemTier.T6, ItemLevel.Level3) => numberOfMaterials * 1057.5,
+                (ItemTier.T6, ItemLevel.Level1) => numberOfMaterials * 540,
+                (ItemTier.T6, ItemLevel.Level2) => numberOfMaterials * 1080,
+                (ItemTier.T6, ItemLevel.Level3) => numberOfMaterials * 2160,
                 (ItemTier.T7, ItemLevel.Level0) => numberOfMaterials * 645,
-                (ItemTier.T7, ItemLevel.Level1) => numberOfMaterials * 1282.5,
-                (ItemTier.T7, ItemLevel.Level2) => numberOfMaterials * 1920,
-                (ItemTier.T7, ItemLevel.Level3) => numberOfMaterials * 2557.5,
+                (ItemTier.T7, ItemLevel.Level1) => numberOfMaterials * 1290,
+                (ItemTier.T7, ItemLevel.Level2) => numberOfMaterials * 2580,
+                (ItemTier.T7, ItemLevel.Level3) => numberOfMaterials * 5160,
                 (ItemTier.T8, ItemLevel.Level0) => numberOfMaterials * 1395,
-                (ItemTier.T8, ItemLevel.Level1) => numberOfMaterials * 2782.5,
-                (ItemTier.T8, ItemLevel.Level2) => numberOfMaterials * 4170,
-                (ItemTier.T8, ItemLevel.Level3) => numberOfMaterials * 5557.5,
+                (ItemTier.T8, ItemLevel.Level1) => numberOfMaterials * 2790,
+                (ItemTier.T8, ItemLevel.Level2) => numberOfMaterials * 5580,
+                (ItemTier.T8, ItemLevel.Level3) => numberOfMaterials * 11160,
                 _ => 0
             };
         }
@@ -95,8 +158,26 @@ namespace StatisticsAnalysisTool.Common
         {
             try
             {
-                return itemQuantity * GetSetupFeePerFoodConsumed(foodValue, item.FullItemInformation.CraftingRequirements.TotalAmountResources, 
-                    (ItemTier)item.Tier, (ItemLevel)item.Level, item.FullItemInformation.CraftingRequirements.CraftResourceList);
+                switch (item.FullItemInformation)
+                {
+                    case Weapon weapon:
+                        {
+                            var resources = GetTotalAmountResources(weapon.CraftingRequirements);
+                            return itemQuantity * GetSetupFeePerFoodConsumed(foodValue, resources, (ItemTier)item.Tier, (ItemLevel)item.Level, weapon.CraftingRequirements?.FirstOrDefault()?.CraftResource);
+                        }
+                    case EquipmentItem equipmentItem:
+                        {
+                            var resources = GetTotalAmountResources(equipmentItem.CraftingRequirements);
+                            return itemQuantity * GetSetupFeePerFoodConsumed(foodValue, resources, (ItemTier)item.Tier, (ItemLevel)item.Level, equipmentItem.CraftingRequirements?.FirstOrDefault()?.CraftResource);
+                        }
+                    case Mount mount:
+                        {
+                            var resources = GetTotalAmountResources(mount.CraftingRequirements);
+                            return itemQuantity * GetSetupFeePerFoodConsumed(foodValue, resources, (ItemTier)item.Tier, (ItemLevel)item.Level, mount.CraftingRequirements?.FirstOrDefault()?.CraftResource);
+                        }
+                }
+
+                return 0;
             }
             catch (Exception e)
             {
@@ -106,63 +187,7 @@ namespace StatisticsAnalysisTool.Common
             }
         }
 
-        public static async Task<bool> LoadAsync()
-        {
-            _simpleItemData = await GetSimpleItemDataFromLocalAsync();
-            _craftingJournalData = await GetJournalNameFromLocalAsync();
-
-            if (_simpleItemData != null && await _simpleItemData.CountAsync() <= 0 || _craftingJournalData != null && await _craftingJournalData.CountAsync() <= 0)
-            {
-                Log.Warn($"{nameof(LoadAsync)}: No Simple item data found.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static async Task<IAsyncEnumerable<SimpleItemData>> GetSimpleItemDataFromLocalAsync()
-        {
-            try
-            {
-                var options = new JsonSerializerOptions()
-                {
-                    ReadCommentHandling = JsonCommentHandling.Skip,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString
-                };
-
-                var localItemString = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.Default.GameFilesDirectoryName, Settings.Default.ItemsFileName), Encoding.UTF8);
-                return (JsonSerializer.Deserialize<List<SimpleItemData>>(localItemString, options) ?? new List<SimpleItemData>()).ToAsyncEnumerable();
-            }
-            catch (Exception e)
-            {
-                ConsoleManager.WriteLineForError(MethodBase.GetCurrentMethod()?.DeclaringType, e);
-                Log.Error(MethodBase.GetCurrentMethod()?.DeclaringType, e);
-                return new List<SimpleItemData>().ToAsyncEnumerable();
-            }
-        }
-
-        public static async Task<IAsyncEnumerable<ItemSpriteToJournalStruct>> GetJournalNameFromLocalAsync()
-        {
-            try
-            {
-                var options = new JsonSerializerOptions()
-                {
-                    ReadCommentHandling = JsonCommentHandling.Skip,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString
-                };
-
-                var localItemString = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.Default.GameFilesDirectoryName, Settings.Default.ItemSpriteToJournalFileName), Encoding.UTF8);
-                return (JsonSerializer.Deserialize<List<ItemSpriteToJournalStruct>>(localItemString, options) ?? new List<ItemSpriteToJournalStruct>()).ToAsyncEnumerable();
-            }
-            catch (Exception e)
-            {
-                ConsoleManager.WriteLineForError(MethodBase.GetCurrentMethod()?.DeclaringType, e);
-                Log.Error(MethodBase.GetCurrentMethod()?.DeclaringType, e);
-                return new List<ItemSpriteToJournalStruct>().ToAsyncEnumerable();
-            }
-        }
-
-        public static double GetSetupFeePerFoodConsumed(int foodValue, int numberOfMaterials, ItemTier tier, ItemLevel level, IEnumerable<CraftResourceList> craftRequiredResources)
+        public static double GetSetupFeePerFoodConsumed(int foodValue, int numberOfMaterials, ItemTier tier, ItemLevel level, IEnumerable<CraftResource> craftResource)
         {
             var tierFactor = (tier, level) switch
             {
@@ -192,13 +217,13 @@ namespace StatisticsAnalysisTool.Common
             };
 
             var safeFoodValue = (foodValue <= 0) ? 1 : foodValue;
-            return safeFoodValue / 100 * numberOfMaterials * (tierFactor + GetArtifactFactor(craftRequiredResources));
+            return safeFoodValue / 100 * numberOfMaterials * (tierFactor + GetArtifactFactor(craftResource));
         }
 
-        private static double GetArtifactFactor(IEnumerable<CraftResourceList> requiredResources, double craftingTaxDefault = 0.0)
+        private static double GetArtifactFactor(IEnumerable<CraftResource> requiredResources, double craftingTaxDefault = 0.0)
         {
             var artifactResource = requiredResources.FirstOrDefault(x => x.UniqueName.Contains("ARTEFACT_TOKEN_FAVOR"));
-            
+
             if (string.IsNullOrEmpty(artifactResource?.UniqueName) || !artifactResource.UniqueName.Contains("ARTEFACT_TOKEN_FAVOR"))
             {
                 return craftingTaxDefault;
@@ -229,7 +254,7 @@ namespace StatisticsAnalysisTool.Common
                 _ => craftingTaxDefault
             };
         }
-        
+
         #region Calculations
 
         public static double GetSetupFeeCalculation(int? craftingItemQuantity, double? setupFee, double? sellPricePerItem)
@@ -243,11 +268,5 @@ namespace StatisticsAnalysisTool.Common
         }
 
         #endregion
-
-        public struct ItemSpriteToJournalStruct
-        {
-            public string Name { get; set; }
-            public CraftingJournalType Id { get; set; }
-        }
     }
 }

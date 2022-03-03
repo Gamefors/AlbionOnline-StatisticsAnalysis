@@ -42,7 +42,7 @@
   <translation name="REVENUE_WITHOUT_FEE">Выручка без комиссии</translation>
   <translation name="PROFIT">Прибыль</translation>
   <translation name="PURCHASE_CITY">Город покупки</translation>
-  <translation name="DOUBLE_VALUE_EXISTS_IN_THE_LANGUAGE_FILE">В языковом файле существует двойное значение</translation>
+  <translation name="DOUBLE_VALUE_EXISTS_IN_THE_LANGUAGE_FILE">В языковом файле существует дублированное значение</translation>
   <translation name="EVERY_DAY">Каждый день</translation>
   <translation name="EVERY_3_DAYS">Каждые 3 дня</translation>
   <translation name="EVERY_7_DAYS">Каждые 7 дней</translation>
@@ -67,9 +67,9 @@
   <translation name="GUILD_ID">ID Гильдии</translation>
   <translation name="ALLIANCE_NAME">Название альянса</translation>
   <translation name="ALLIANCE_ID">ID альянса</translation>
-  <translation name="DEATH_FAME">Слава за смерти</translation>
-  <translation name="KILL_FAME">Слава за убийство игроков</translation>
-  <translation name="FAME_RATIO">Соотношение славы</translation>
+  <translation name="DEATH_FAME">Опыт за смерти</translation>
+  <translation name="KILL_FAME">Опыт за убийство игроков</translation>
+  <translation name="FAME_RATIO">Соотношение опыта</translation>
   <translation name="TOTAL_KILLS">Всего убийств</translation>
   <translation name="GVG_KILLS">Убийств в GVG</translation>
   <translation name="GVG_WON">Побед в GVG</translation>
@@ -307,14 +307,14 @@
   <translation name="REAL_MONEY_PRICE">Цена в реальных деньгах</translation>
   <translation name="TOO_MANY_REQUESTS_CLOSE_WINDOWS_OR_WAIT">Слишком много запросов, закройте несколько окон или подождите несколько минут.</translation>
 
-  <translation name="ALARM_SOUND_USED">Звук сигнала используется</translation>
+  <translation name="ALARM_SOUND_USED">Звук оповещений</translation>
   <translation name="ITEM_PRICE_UNDERCUT">Снижение цены товара</translation>
   <translation name="THE_PRICE_OF">Цена</translation>
   <translation name="IN">в</translation>
-  <translation name="SHOW_ONLY_ITEMS_WITH_ALERT_ON">Только незагруженные</translation>
+  <translation name="SHOW_ONLY_ITEMS_WITH_ALERT_ON">Предметы с оповещением</translation>
   <translation name="SHOW_ONLY_FAVORITES">Показать только избранное</translation>
   <translation name="HAS_BEEN_UNDERCUT">был подрезан</translation>
-  <translation name="IS_ALERT_ACTIVATE">Оповещение</translation>
+  <translation name="IS_ALERT_ACTIVATE">Оповещать</translation>
   <translation name="UNDERCUTTING_PRICE">Подрезка</translation>
   <translation name="AVERAGE_PRICES">Средние цены</translation>
   <translation name="AVERAGE_PRICES_TOOLTIP">Цена продажи мин. | Цена продажи макс. | Цена покупки мин. | Цена покупки макс.</translation>
@@ -341,7 +341,6 @@
   <translation name="DAYS">Дни</translation>
   <translation name="OVER_A_YEAR">В течение года</translation>
   <translation name="CURRENT_MAP">Текущая карта</translation>
-  <translation name="KILLDED_BY">убит</translation>
   <translation name="DUNGEON">Подземелье</translation>
   <translation name="ARENA">Арена</translation>
   <translation name="CORRUPTED_LAIR">Корапт</translation>
@@ -369,7 +368,7 @@
 
   <translation name="MAIN_TRACKER_DESCRIPTION_1">При правильной работе трекера значок Wi-Fi должен быть зеленым. Для достижения этого статуса необходимо изменить свою локацию.</translation>
   <translation name="MAIN_TRACKER_DESCRIPTION_2">Присоединяйтесь к группе или пригласите кого-нибудь в свою группу, чтобы обновить кол-во людей в счётчике. Неважно, приглашаете ли вы игроков в группу сами или кто-то другой.</translation>
-  <translation name="MAIN_TRACKER_DESCRIPTION_3">Слава, которую отслеживает трекер - настоящая всеобщая слава. То есть с Premium и Satchel Fame. Слава в профиле игрока - это обычная слава, без усилений к славе.</translation>
+  <translation name="MAIN_TRACKER_DESCRIPTION_3">Слава, которую отслеживает трекер - настоящая всеобщая слава. То есть с Премиумом и Кошелем Интуиции. Слава в профиле игрока - это обычный опыт, без усилений к опыту.</translation>
   <translation name="DAMAGE_METER_DESCRIPTION_1">Чтобы можно было распознать урон от других игроков в группе, сначала необходимо активировать инструмент, а затем игрок должен покинуть группу или присоединиться к ней.</translation>
 
   <translation name="SORT_BY_DAMAGE">Сортировать по урону</translation>
@@ -389,9 +388,9 @@
   <translation name="FAME_SHRINE">Чаша Опыта</translation>
   <translation name="COMBAT_BUFF">Боевой бафф</translation>
 
-  <translation name="CITY_PRICES_API_URL">Городские цены API URL</translation>
-  <translation name="CITY_PRICES_HISTORY_API_URL">История цен в городе API URL</translation>
-  <translation name="GOLD_STATS_API_URL">Статистика по золоту API URL</translation>
+  <translation name="CITY_PRICES_API_URL">Ссылка на API городских цен</translation>
+  <translation name="CITY_PRICES_HISTORY_API_URL">Ссылка на API истории цен</translation>
+  <translation name="GOLD_STATS_API_URL">Ссылка на API цен на золото</translation>
 
   <translation name="SAFE">Безопасно</translation>
   <translation name="DUNGEON_TIMER">Таймер подземелья</translation>
@@ -485,7 +484,7 @@
   <translation name="SAVE_LOOT_LOGGER_NOW">Сохранить логи лута?</translation>
   <translation name="SAVE_LOOT_LOGGER">Сохранить логи</translation>
   <translation name="TRACKING_SILVER">Отслеживать серебро</translation>
-  <translation name="TRACKING_FAME">Отслеживать славу</translation>
+  <translation name="TRACKING_FAME">Отслеживать опыт</translation>
   <translation name="ITEM_SEARCH">Предметы</translation>
   <translation name="DUNGEONS">Подземелья</translation>
   <translation name="PLAYER_INFORMATION">Информация о игроке</translation>
@@ -498,4 +497,35 @@
   <translation name="MIGHT">Могущество</translation>
   <translation name="FAVOR">Благосклонность</translation>
   <translation name="USAGE_FEE_PER_HUNDRED_FOOD">Налог за 100 единиц еды</translation>
+  <translation name="SHOW_LOOT_FROM_MOBS">Показывать лут с мобов</translation>
+  <translation name="TRACKING_MOB_LOOT">Отслеживать лут с мобов</translation>
+  <translation name="ITEMS_JSON_SOURCE_URL">Ссылка на источник для Items.json</translation>
+  <translation name="UPDATE_ITEMS_JSON_BY_DAYS">Обвновлять items.json раз в дней: </translation>
+  <translation name="SHOP_CATEGORY">Категория рынка</translation>
+  <translation name="SHOP_SUB_CATEGORY">Подкатегория рынка</translation>
+  <translation name="CAN_BE_OVERCHARGED">Может прогреться</translation>
+  <translation name="WAR_GLOVES">Боевые перчатки</translation>
+  <translation name="TRY_DOWNLOADING_THE_ITEM_JSON_AGAIN">Попробуйте скачать item.json снова</translation>
+  <translation name="ITEM_JSON_CAN_NOT_BE_LOADED">Item.json не может установиться.</translation>
+
+  <translation name="SUGGEST_PRE_RELEASE_UPDATES">Предлагать тестовые версии</translation>
+  <translation name="ATTENTION_THESE_VERSION_ARE_STILL_BEING_TESTED">ВНИМАНИЕ! Эта версия ещё тестируется!</translation>
+
+  <translation name="DUNGEON_RESPEC">Свободки за данж</translation>
+  <translation name="DUNGEON_SILVER">Серебра за данж</translation>
+  <translation name="DUNGEON_FAME_PER_HOUR">Опыт с данжа в час</translation>
+  <translation name="DUNGEON_RESPEC_PER_HOUR">Свободки с данжа в час</translation>
+  <translation name="DUNGEON_SILVER_PER_HOUR">Серебра с данжа в час</translation>
+
+  <translation name="GET_PRICE">Получить цены из</translation>
+  <translation name="FACTION_FLAGS">Фракционные очки</translation>
+  <translation name="FACTION_FLAGS_PER_HOUR">Фракционных очков в час</translation>
+  <translation name="FACTION_COINS">Фракционные монеты</translation>
+  <translation name="FACTION_COINS_PER_HOUR">Фракционных монет в час</translation>
+  <translation name="EXPORT_LOOT_LOGGING_FILE_WITH_REAL_ITEM_NAME">Экспортировать логи с реальными названиями</translation>
+  <translation name="MIGHT_PER_HOUR">Могущества в час</translation>
+  <translation name="FAVOR_PER_HOUR">Благосклонности в час</translation>
+  <translation name="TOP_LOOTERS">Топ лутеров</translation>
+  <translation name="WAS_KILLED_BY">убит</translation>
+  <translation name="SHOW_KILLS">Показать убийства</translation>
 </translations>

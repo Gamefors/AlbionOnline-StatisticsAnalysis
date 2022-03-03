@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using log4net;
+using StatisticsAnalysisTool.Common.UserSettings;
 
 namespace StatisticsAnalysisTool.Network.Manager
 {
@@ -22,8 +23,9 @@ namespace StatisticsAnalysisTool.Network.Manager
 
         private readonly ConcurrentDictionary<Guid, PlayerGameObject> _knownEntities = new();
         private readonly ConcurrentDictionary<Guid, string> _knownPartyEntities = new();
+        private readonly TrackingController _trackingController;
         private readonly MainWindowViewModel _mainWindowViewModel;
-        private readonly ObservableCollection<EquipmentItem> _newEquipmentItems = new();
+        private readonly ObservableCollection<EquipmentItemInternal> _newEquipmentItems = new();
         private readonly ObservableCollection<SpellEffect> _spellEffects = new();
         private readonly ConcurrentDictionary<long, CharacterEquipmentData> _tempCharacterEquipmentData = new();
         private double _lastLocalEntityGuildTaxInPercent;
@@ -31,17 +33,23 @@ namespace StatisticsAnalysisTool.Network.Manager
 
         public LocalUserData LocalUserData { get; set; }
 
-        public EntityController(MainWindowViewModel mainWindowViewModel)
+        public EntityController(TrackingController trackingController, MainWindowViewModel mainWindowViewModel)
         {
+            _trackingController = trackingController;
             _mainWindowViewModel = mainWindowViewModel;
         }
-
+        
         #region Entities
 
         public event Action<GameObject> OnAddEntity;
 
         public void AddEntity(long objectId, Guid userGuid, Guid? interactGuid, string name, GameObjectType objectType, GameObjectSubType objectSubType)
         {
+            if (objectSubType == GameObjectSubType.LocalPlayer)
+            {
+                _trackingController.SetMainCharacterNameForTracking(name);
+            }
+
             PlayerGameObject gameObject;
 
             if (_knownEntities.TryRemove(userGuid, out var oldEntity))
@@ -92,12 +100,7 @@ namespace StatisticsAnalysisTool.Network.Manager
                 x.Value.ObjectSubType == GameObjectSubType.LocalPlayer || _knownPartyEntities.ContainsKey(x.Key)))
                 entity.Value.ObjectId = null;
         }
-
-        public bool ExistLocalEntity()
-        {
-            return _knownEntities?.Any(x => x.Value.ObjectSubType == GameObjectSubType.LocalPlayer) ?? false;
-        }
-
+        
         public KeyValuePair<Guid, PlayerGameObject>? GetEntity(long objectId)
         {
             return _knownEntities?.FirstOrDefault(x => x.Value.ObjectId == objectId);
@@ -112,15 +115,16 @@ namespace StatisticsAnalysisTool.Network.Manager
 
         public bool IsEntityInParty(string name) => GetAllEntities(true).Any(x => x.Value.Name == name);
 
-        public KeyValuePair<Guid, PlayerGameObject>? GetLocalEntity() => _knownEntities?.ToArray().FirstOrDefault(x => x.Value.ObjectSubType == GameObjectSubType.LocalPlayer);
-
         #endregion
 
         #region Party
 
         public async Task AddToPartyAsync(Guid guid, string username)
         {
-            if (_knownPartyEntities.All(x => x.Key != guid)) _knownPartyEntities.TryAdd(guid, username);
+            if (_knownPartyEntities.All(x => x.Key != guid))
+            {
+                _knownPartyEntities.TryAdd(guid, username);
+            }
 
             await SetPartyMemberUiAsync();
         }
@@ -174,17 +178,7 @@ namespace StatisticsAnalysisTool.Network.Manager
                 _mainWindowViewModel.PartyMemberNumber = _knownPartyEntities.Count;
             });
         }
-
-        public void SetPartyCircleColor(Guid userGuid, string weaponCategoryId)
-        {
-            var memberObject = _mainWindowViewModel?.PartyMemberCircles?.FirstOrDefault(x => x.UserGuid == userGuid);
-            if (memberObject?.WeaponCategoryId != null && memberObject.WeaponCategoryId != weaponCategoryId)
-            {
-                memberObject.WeaponCategoryId = weaponCategoryId;
-            }
-
-        }
-
+        
         public bool IsUserInParty(string name)
         {
             return _knownPartyEntities.Any(x => x.Value == name);
@@ -233,18 +227,18 @@ namespace StatisticsAnalysisTool.Network.Manager
             }
         }
 
-        public void AddEquipmentItem(EquipmentItem item)
+        public void AddEquipmentItem(EquipmentItemInternal itemInternal)
         {
             lock (_newEquipmentItems)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (_newEquipmentItems.ToList().Any(x => x == null || x.ItemIndex.Equals(item?.ItemIndex) && x.SpellDictionary?.Values == item.SpellDictionary?.Values))
+                    if (_newEquipmentItems.ToList().Any(x => x == null || x.ItemIndex.Equals(itemInternal?.ItemIndex) && x.SpellDictionary?.Values == itemInternal.SpellDictionary?.Values))
                     {
                         return;
                     }
 
-                    _newEquipmentItems.Add(item);
+                    _newEquipmentItems.Add(itemInternal);
                 });
             }
 
@@ -391,30 +385,38 @@ namespace StatisticsAnalysisTool.Network.Manager
             }
         }
 
+        public void ResetEntitiesHeal()
+        {
+            foreach (var entity in _knownEntities)
+            {
+                entity.Value.Heal = 0;
+            }
+        }
+
         #endregion
 
         #region Health
 
         public void HealthUpdate(
             long objectId,
-            GameTimeStamp TimeStamp,
-            double HealthChange,
-            double NewHealthValue,
-            EffectType EffectType,
-            EffectOrigin EffectOrigin,
-            long CauserId,
-            int CausingSpellType
+            GameTimeStamp timeStamp,
+            double healthChange,
+            double newHealthValue,
+            EffectType effectType,
+            EffectOrigin effectOrigin,
+            long causerId,
+            int causingSpellType
         )
         {
             OnHealthUpdate?.Invoke(
                 objectId,
-                TimeStamp,
-                HealthChange,
-                NewHealthValue,
-                EffectType,
-                EffectOrigin,
-                CauserId,
-                CausingSpellType
+                timeStamp,
+                healthChange,
+                newHealthValue,
+                effectType,
+                effectOrigin,
+                causerId,
+                causingSpellType
             );
         }
 
@@ -437,6 +439,13 @@ namespace StatisticsAnalysisTool.Network.Manager
         }
 
         public FixPoint GetLastLocalEntityGuildTax(FixPoint yieldPreTax) => FixPoint.FromFloatingPointValue(yieldPreTax.DoubleValue / 100 * _lastLocalEntityGuildTaxInPercent);
+
+        public bool ExistLocalEntity()
+        {
+            return _knownEntities?.Any(x => x.Value.ObjectSubType == GameObjectSubType.LocalPlayer) ?? false;
+        }
+
+        public KeyValuePair<Guid, PlayerGameObject>? GetLocalEntity() => _knownEntities?.ToArray().FirstOrDefault(x => x.Value.ObjectSubType == GameObjectSubType.LocalPlayer);
 
         #endregion
     }

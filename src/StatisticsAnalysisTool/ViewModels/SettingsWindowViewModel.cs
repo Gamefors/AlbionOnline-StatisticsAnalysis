@@ -25,7 +25,6 @@ namespace StatisticsAnalysisTool.ViewModels
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         private ObservableCollection<FileInformation> _alertSounds = new();
         private FileInformation _alertSoundSelection;
-        private int _fullItemInformationUpdateCycleDays;
         private bool _isOpenItemWindowInNewWindowChecked;
         private bool _showInfoWindowOnStartChecked;
         private SettingsWindowTranslation _translation;
@@ -33,7 +32,12 @@ namespace StatisticsAnalysisTool.ViewModels
         private string _cityPricesHistoryApiUrl;
         private string _goldStatsApiUrl;
         private bool _isLootLoggerSaveReminderActive;
-        private string _automaticLootLoggerSavePath;
+        private string _itemsJsonSourceUrl;
+        private ObservableCollection<FileSettingInformation> _updateItemsJsonByDays = new();
+        private FileSettingInformation _updateItemsJsonByDaysSelection;
+        private bool _isSuggestPreReleaseUpdatesActive;
+        private bool _isItemRealNameInLoggingExportActive;
+        private string _mainTrackingCharacterName;
 
         public SettingsWindowViewModel()
         {
@@ -84,6 +88,12 @@ namespace StatisticsAnalysisTool.ViewModels
 
             #endregion
 
+            #region MainTrackingCharacterName
+
+            MainTrackingCharacterName = SettingsController.CurrentSettings.MainTrackingCharacterName;
+
+            #endregion
+
             #region Update item list by days
 
             UpdateItemListByDays.Clear();
@@ -96,10 +106,21 @@ namespace StatisticsAnalysisTool.ViewModels
 
             DiscordWebhookUrl = SettingsController.CurrentSettings.DiscordWebhookUrl;
             ItemListSourceUrl = SettingsController.CurrentSettings.ItemListSourceUrl;
-            IsOpenItemWindowInNewWindowChecked = SettingsController.CurrentSettings.IsOpenItemWindowInNewWindowChecked;
-            ShowInfoWindowOnStartChecked = SettingsController.CurrentSettings.IsInfoWindowShownOnStart;
-            FullItemInformationUpdateCycleDays = SettingsController.CurrentSettings.FullItemInformationUpdateCycleDays;
 
+            #endregion
+
+            #region Update items.json by days
+
+            UpdateItemsJsonByDays.Clear();
+            UpdateItemsJsonByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_DAY"), Value = 1 });
+            UpdateItemsJsonByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_3_DAYS"), Value = 3 });
+            UpdateItemsJsonByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_7_DAYS"), Value = 7 });
+            UpdateItemsJsonByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_14_DAYS"), Value = 14 });
+            UpdateItemsJsonByDays.Add(new FileSettingInformation { Name = LanguageController.Translation("EVERY_28_DAYS"), Value = 28 });
+            UpdateItemsJsonByDaysSelection = UpdateItemsJsonByDays.FirstOrDefault(x => x.Value == SettingsController.CurrentSettings.UpdateItemsJsonByDays);
+
+            ItemsJsonSourceUrl = SettingsController.CurrentSettings.ItemsJsonSourceUrl;
+            
             #endregion
 
             #region Alert Sounds
@@ -126,19 +147,31 @@ namespace StatisticsAnalysisTool.ViewModels
             #region Loot logger
 
             IsLootLoggerSaveReminderActive = SettingsController.CurrentSettings.IsLootLoggerSaveReminderActive;
+            IsItemRealNameInLoggingExportActive = SettingsController.CurrentSettings.IsItemRealNameInLoggingExportActive;
 
             #endregion
+
+            #region Auto update
+
+            IsSuggestPreReleaseUpdatesActive = SettingsController.CurrentSettings.IsSuggestPreReleaseUpdatesActive;
+
+            #endregion
+
+            IsOpenItemWindowInNewWindowChecked = SettingsController.CurrentSettings.IsOpenItemWindowInNewWindowChecked;
+            ShowInfoWindowOnStartChecked = SettingsController.CurrentSettings.IsInfoWindowShownOnStart;
         }
 
         public void SaveSettings()
         {
             SettingsController.CurrentSettings.DiscordWebhookUrl = DiscordWebhookUrl;
             SettingsController.CurrentSettings.ItemListSourceUrl = ItemListSourceUrl;
+            SettingsController.CurrentSettings.ItemsJsonSourceUrl = ItemsJsonSourceUrl;
             SettingsController.CurrentSettings.RefreshRate = RefreshRatesSelection.Value;
+            SettingsController.CurrentSettings.MainTrackingCharacterName = MainTrackingCharacterName;
             SettingsController.CurrentSettings.UpdateItemListByDays = UpdateItemListByDaysSelection.Value;
+            SettingsController.CurrentSettings.UpdateItemsJsonByDays = UpdateItemsJsonByDaysSelection.Value;
             SettingsController.CurrentSettings.IsOpenItemWindowInNewWindowChecked = IsOpenItemWindowInNewWindowChecked;
             SettingsController.CurrentSettings.IsInfoWindowShownOnStart = ShowInfoWindowOnStartChecked;
-            SettingsController.CurrentSettings.FullItemInformationUpdateCycleDays = FullItemInformationUpdateCycleDays;
             SettingsController.CurrentSettings.SelectedAlertSound = AlertSoundSelection?.FileName ?? string.Empty;
 
             LanguageController.CurrentCultureInfo = new CultureInfo(LanguagesSelection.FileName);
@@ -149,20 +182,20 @@ namespace StatisticsAnalysisTool.ViewModels
             SettingsController.CurrentSettings.GoldStatsApiUrl = string.IsNullOrEmpty(GoldStatsApiUrl) ? Settings.Default.GoldStatsApiUrlDefault : GoldStatsApiUrl;
 
             SettingsController.CurrentSettings.IsLootLoggerSaveReminderActive = IsLootLoggerSaveReminderActive;
+            SettingsController.CurrentSettings.IsItemRealNameInLoggingExportActive = IsItemRealNameInLoggingExportActive;
+            SettingsController.CurrentSettings.IsSuggestPreReleaseUpdatesActive = IsSuggestPreReleaseUpdatesActive;
 
             SetAppSettingsAndTranslations();
+        }
+
+        public void ReloadSettings()
+        {
+            MainTrackingCharacterName = SettingsController.CurrentSettings.MainTrackingCharacterName;
         }
 
         private void SetAppSettingsAndTranslations()
         {
             Translation = new SettingsWindowTranslation();
-
-            //_mainWindowViewModel.SetUiElements();
-            //_mainWindowViewModel.IsFullItemInformationCompleteCheck();
-            //_mainWindowViewModel.PlayerModeTranslation = new PlayerModeTranslation();
-            //_mainWindowViewModel.LoadTranslation = LanguageController.Translation("LOAD");
-            //_mainWindowViewModel.NumberOfValuesTranslation = LanguageController.Translation("NUMBER_OF_VALUES");
-            //_mainWindowViewModel.UpdateTranslation = LanguageController.Translation("UPDATE");
         }
 
         public struct FileSettingInformation
@@ -192,17 +225,7 @@ namespace StatisticsAnalysisTool.ViewModels
                 OnPropertyChanged();
             }
         }
-
-        public int FullItemInformationUpdateCycleDays
-        {
-            get => _fullItemInformationUpdateCycleDays;
-            set
-            {
-                _fullItemInformationUpdateCycleDays = value;
-                OnPropertyChanged();
-            }
-        }
-
+        
         public FileSettingInformation UpdateItemListByDaysSelection
         {
             get => _updateItemListByDaysSelection;
@@ -213,12 +236,32 @@ namespace StatisticsAnalysisTool.ViewModels
             }
         }
 
+        public FileSettingInformation UpdateItemsJsonByDaysSelection
+        {
+            get => _updateItemsJsonByDaysSelection;
+            set
+            {
+                _updateItemsJsonByDaysSelection = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<FileSettingInformation> UpdateItemListByDays
         {
             get => _updateItemListByDays;
             set
             {
                 _updateItemListByDays = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<FileSettingInformation> UpdateItemsJsonByDays
+        {
+            get => _updateItemsJsonByDays;
+            set
+            {
+                _updateItemsJsonByDays = value;
                 OnPropertyChanged();
             }
         }
@@ -239,6 +282,16 @@ namespace StatisticsAnalysisTool.ViewModels
             set
             {
                 _refreshRates = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string MainTrackingCharacterName
+        {
+            get => _mainTrackingCharacterName;
+            set
+            {
+                _mainTrackingCharacterName = value;
                 OnPropertyChanged();
             }
         }
@@ -277,6 +330,16 @@ namespace StatisticsAnalysisTool.ViewModels
             set
             {
                 _itemListSourceUrl = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string ItemsJsonSourceUrl
+        {
+            get => _itemsJsonSourceUrl;
+            set
+            {
+                _itemsJsonSourceUrl = value;
                 OnPropertyChanged();
             }
         }
@@ -351,16 +414,26 @@ namespace StatisticsAnalysisTool.ViewModels
             }
         }
 
-        public string AutomaticLootLoggerSavePath
+        public bool IsItemRealNameInLoggingExportActive
         {
-            get => _automaticLootLoggerSavePath;
+            get => _isItemRealNameInLoggingExportActive;
             set
             {
-                _automaticLootLoggerSavePath = value;
+                _isItemRealNameInLoggingExportActive = value;
                 OnPropertyChanged();
             }
         }
 
+        public bool IsSuggestPreReleaseUpdatesActive
+        {
+            get => _isSuggestPreReleaseUpdatesActive;
+            set
+            {
+                _isSuggestPreReleaseUpdatesActive = value;
+                OnPropertyChanged();
+            }
+        }
+        
         public string ToolDirectory => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public event PropertyChangedEventHandler PropertyChanged;

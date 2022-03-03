@@ -365,6 +365,15 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type notification:KillNotificationFragment}">
+        <StackPanel Orientation="Horizontal" Height="24">
+            <TextBlock Text="{Binding Died, IsAsync=True, StringFormat='{}{0} '}" Foreground="{StaticResource SolidColorBrush.Accent.Red.3}"/>
+            <TextBlock Text="{Binding ValueText, IsAsync=True, StringFormat='{}{0} '}" Foreground="{StaticResource SolidColorBrush.Text.1}"/>
+            <TextBlock Text="{Binding KilledBy, IsAsync=True, StringFormat='{}{0}'}" Foreground="{StaticResource SolidColorBrush.Accent.Blue.3}"/>
+            <Image Source="../Resources/skull.png" Margin="0,-5,0,0" Height="24" Width="24" />
+        </StackPanel>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type models:MainStatObject}">
         <StackPanel Orientation="Vertical" Margin="10,0,10,0" Visibility="{Binding Visibility}">
             <Image Style="{StaticResource Tracker.Fraction.Coin.Icon}" ToolTip="{Binding TranslationTotalFactionPoints, FallbackValue='TOTAL__FACTION__POINTS'}" />
@@ -604,5 +613,14 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Loot logger styles -->
+    <DataTemplate DataType="{x:Type models:TopLooterObject}">
+        <StackPanel Orientation="Horizontal" Margin="5,-5,5,0" Height="20">
+            <Label Content="{Binding Placement}" ContentStringFormat="{}{0:N0}." Padding="0,5,0,0"/>
+            <Label Content="{Binding PlayerName}" ContentStringFormat="{}{0:N0}" Padding="0,5,0,0"/>
+            <Label Content="{Binding LootActions}" ContentStringFormat="{}({0:N0})" Padding="0,5,0,0"/>
+        </StackPanel>
+    </DataTemplate>
 
 </ResourceDictionary>
