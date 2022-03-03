@@ -2,6 +2,7 @@ using log4net;
 using Newtonsoft.Json;
 using StatisticsAnalysisTool.Common;
 using StatisticsAnalysisTool.Enumerations;
+using StatisticsAnalysisTool.Models;
 using StatisticsAnalysisTool.Models.NetworkModel;
 using StatisticsAnalysisTool.Network.Notification;
 using StatisticsAnalysisTool.ViewModels;
@@ -568,7 +569,7 @@ namespace StatisticsAnalysisTool.Network.Manager
         {
             for (var i = 0; i < runs; i++)
             {
-                var damage = _random.Next(-100, 100);
+               // var damage = _random.Next(-100, 100);
                 // await AddDamageAsync(9999, entity.ObjectId ?? -1, damage, _random.Next(2000, 3000));
                 //Debug.Print($"--- AddDamage - {entity.Name}: {damage}");
 
